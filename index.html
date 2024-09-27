@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Clientes</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">SOHO Control</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item active">
+          <a class="nav-link" href="index.html">Clientes <span class="sr-only">(atual)</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="vendas.html">Vendas</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="produtos.html">Estoque</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Conteúdo Principal -->
+  <div class="container mt-5">
+    <!-- Nav Tabs -->
+    <ul class="nav nav-tabs" id="clienteTab" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" id="cadastrar-tab" data-toggle="tab" href="#cadastrar" role="tab" aria-controls="cadastrar" aria-selected="true">Cadastrar Cliente</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="visualizar-tab" data-toggle="tab" href="#visualizar" role="tab" aria-controls="visualizar" aria-selected="false">Visualizar Clientes</a>
+      </li>
+    </ul>
+
+    <!-- Conteúdo das Abas -->
+    <div class="tab-content" id="clienteTabContent">
+      <!-- Aba Cadastrar -->
+      <div class="tab-pane fade show active" id="cadastrar" role="tabpanel" aria-labelledby="cadastrar-tab">
+        <h2 class="mt-4">Cadastrar Cliente</h2>
+        <form id="clienteForm">
+          <div class="form-group">
+            <label for="nome">Nome*</label>
+            <input type="text" class="form-control" id="nome" placeholder="Insira o nome" required>
+          </div>
+          <div class="form-group">
+            <label for="cpf_cnpj">CPF ou CNPJ</label>
+            <input type="text" class="form-control" id="cpf_cnpj" placeholder="Insira o CPF ou CNPJ">
+          </div>
+          <div class="form-group">
+            <label for="endereco">Endereço</label>
+            <input type="text" class="form-control" id="endereco" placeholder="Insira o endereço">
+          </div>
+          <div class="form-group">
+            <label for="telefone">Telefone</label>
+            <input type="tel" class="form-control" id="telefone" placeholder="Insira o telefone">
+          </div>
+          <div class="form-group">
+            <label for="email">E-mail</label>
+            <input type="email" class="form-control" id="email" placeholder="Insira o e-mail">
+          </div>
+          <button type="submit" class="btn btn-primary">Salvar</button>
+        </form>
+      </div>
+
+      <!-- Aba Visualizar -->
+      <div class="tab-pane fade" id="visualizar" role="tabpanel" aria-labelledby="visualizar-tab">
+        <h2 class="mt-4">Visualizar Clientes</h2>
+        <!-- Campo de Busca -->
+        <div class="form-group">
+          <label for="buscarCliente">Buscar por Nome:</label>
+          <input type="text" class="form-control" id="buscarCliente" placeholder="Digite o nome do cliente">
+        </div>
+        <!-- Tabela de Clientes -->
+        <table class="table table-striped" id="tabelaClientes">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>CPF/CNPJ</th>
+              <th>Endereço</th>
+              <th>Telefone</th>
+              <th>E-mail</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Linhas serão inseridas dinamicamente -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS e dependências -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Script JavaScript -->
+  <script>
+    let clientes = [];
+
+    document.getElementById('clienteForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      let nome = document.getElementById('nome').value;
+      let cpf_cnpj = document.getElementById('cpf_cnpj').value;
+      let endereco = document.getElementById('endereco').value;
+      let telefone = document.getElementById('telefone').value;
+      let email = document.getElementById('email').value;
+
+      let cliente = {
+        nome: nome,
+        cpf_cnpj: cpf_cnpj,
+        endereco: endereco,
+        telefone: telefone,
+        email: email
+      };
+
+      clientes.push(cliente);
+      document.getElementById('clienteForm').reset();
+      alert('Cliente cadastrado com sucesso!');
+    });
+
+    function atualizarTabelaClientes() {
+      let tbody = document.querySelector('#tabelaClientes tbody');
+      tbody.innerHTML = '';
+
+      let busca = document.getElementById('buscarCliente').value.toLowerCase();
+      let clientesFiltrados = clientes.filter(function(cliente) {
+        return cliente.nome.toLowerCase().includes(busca);
+      });
+
+      clientesFiltrados.forEach(function(cliente) {
+        let row = tbody.insertRow();
+        row.insertCell().innerText = cliente.nome;
+        row.insertCell().innerText = cliente.cpf_cnpj;
+        row.insertCell().innerText = cliente.endereco;
+        row.insertCell().innerText = cliente.telefone;
+        row.insertCell().innerText = cliente.email;
+      });
+    }
+
+    document.getElementById('buscarCliente').addEventListener('input', atualizarTabelaClientes);
+    document.getElementById('visualizar-tab').addEventListener('click', atualizarTabelaClientes);
+  </script>
+</body>
+</html>
