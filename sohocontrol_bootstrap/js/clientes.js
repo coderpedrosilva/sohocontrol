@@ -6,6 +6,8 @@ document.getElementById('clienteForm').addEventListener('submit', function(e) {
     nome: document.getElementById('nome').value,
     cpfCnpj: document.getElementById('cpf_cnpj').value,
     endereco: document.getElementById('endereco').value,
+    cidade: document.getElementById('cidade').value,
+    estado: document.getElementById('estado').value,
     telefone: document.getElementById('telefone').value,
     email: document.getElementById('email').value
   };
@@ -33,8 +35,11 @@ function atualizarTabelaClientes() {
       let tbody = document.querySelector('#tabelaClientes tbody');
       tbody.innerHTML = '';
 
+      // Ordenar clientes do mais recente para o mais antigo
+      let sortedClients = data.sort((a, b) => b.id - a.id);
+
       let search = document.getElementById('buscarCliente').value.toLowerCase();
-      let filteredClients = data.filter(function(cliente) {
+      let filteredClients = sortedClients.filter(function(cliente) {
         return cliente.nome.toLowerCase().includes(search);
       });
 
@@ -43,6 +48,8 @@ function atualizarTabelaClientes() {
         row.insertCell().innerText = cliente.nome;
         row.insertCell().innerText = cliente.cpfCnpj;
         row.insertCell().innerText = cliente.endereco;
+        row.insertCell().innerText = cliente.cidade;
+        row.insertCell().innerText = cliente.estado;
         row.insertCell().innerText = cliente.telefone;
         row.insertCell().innerText = cliente.email;
       });

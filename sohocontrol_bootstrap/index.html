@@ -4,6 +4,29 @@
   <meta charset="UTF-8">
   <title>Clientes</title>
   <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+  <style>
+    /* Ajuste para a setinha no campo de seleção do Estado */
+    .select-container {
+      position: relative;
+    }
+
+    .select-container select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      padding-right: 25px; /* Espaço para a setinha */
+    }
+
+    /* Estilização da setinha para aparecer à direita */
+    .select-container::after {
+      content: '\25BC'; /* Unicode para setinha */
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+  </style>
 </head>
 <body>
   <!-- Navbar -->
@@ -51,10 +74,50 @@
             <label for="cpf_cnpj">CPF ou CNPJ</label>
             <input type="text" class="form-control" id="cpf_cnpj" placeholder="Insira o CPF ou CNPJ">
           </div>
-          <div class="form-group">
+          <div class="form-group row">
             <label for="endereco">Endereço</label>
-            <input type="text" class="form-control" id="endereco" placeholder="Insira o endereço">
+            <div class="col-md-8">
+              <input type="text" class="form-control" id="endereco" placeholder="Endereço">
+            </div>
+            <div class="col-md-4">
+              <input type="text" class="form-control" id="cidade" placeholder="Cidade">
+            </div>
           </div>
+          
+          <div class="form-group">
+            <select class="form-control" id="estado">
+              <option value="">Selecione o Estado</option>
+              <option value="AC">AC</option>
+              <option value="AL">AL</option>
+              <option value="AP">AP</option>
+              <option value="AM">AM</option>
+              <option value="BA">BA</option>
+              <option value="CE">CE</option>
+              <option value="DF">DF</option>
+              <option value="ES">ES</option>
+              <option value="GO">GO</option>
+              <option value="MA">MA</option>
+              <option value="MT">MT</option>
+              <option value="MS">MS</option>
+              <option value="MG">MG</option>
+              <option value="PA">PA</option>
+              <option value="PB">PB</option>
+              <option value="PR">PR</option>
+              <option value="PE">PE</option>
+              <option value="PI">PI</option>
+              <option value="RJ">RJ</option>
+              <option value="RN">RN</option>
+              <option value="RS">RS</option>
+              <option value="RO">RO</option>
+              <option value="RR">RR</option>
+              <option value="SC">SC</option>
+              <option value="SP">SP</option>
+              <option value="SE">SE</option>
+              <option value="TO">TO</option>
+            </select>
+          </div>
+          
+
           <div class="form-group">
             <label for="telefone">Telefone</label>
             <input type="tel" class="form-control" id="telefone" placeholder="Insira o telefone">
@@ -80,6 +143,8 @@
               <th>Nome</th>
               <th>CPF/CNPJ</th>
               <th>Endereço</th>
+              <th>Cidade</th>
+              <th>Estado</th>
               <th>Telefone</th>
               <th>E-mail</th>
             </tr>

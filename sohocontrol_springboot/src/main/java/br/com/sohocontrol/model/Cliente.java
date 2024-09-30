@@ -14,9 +14,12 @@ public class Cliente {
     private String nome;
     private String cpfCnpj;
     private String endereco;
+    private String cidade;
+    private String estado;
     private String telefone;
     private String email;
 
+    // Getters e Setters
     public Long getId() {
         return id;
     }
@@ -47,6 +50,22 @@ public class Cliente {
 
     public void setEndereco(String endereco) {
         this.endereco = endereco;
+    }
+
+    public String getCidade() {
+        return cidade;
+    }
+
+    public void setCidade(String cidade) {
+        this.cidade = cidade;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
     }
 
     public String getTelefone() {
