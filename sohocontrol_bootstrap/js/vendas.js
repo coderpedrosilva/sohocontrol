@@ -35,6 +35,32 @@ document.getElementById('cliente_venda').addEventListener('input', function() {
   }
 });
 
+// Função para autocomplete de produtos
+document.addEventListener('input', function(event) {
+  if (event.target && event.target.name === 'produto_venda') {
+    autocompleteProduto(event.target);
+  }
+});
+
+function autocompleteProduto(inputElement) {
+  let inputValue = inputElement.value.toLowerCase();
+  let suggestionsDiv = inputElement.nextElementSibling; // Localiza a div de sugestões logo após o input
+  suggestionsDiv.innerHTML = ''; // Limpa sugestões anteriores
+
+  if (inputValue.length > 0) {
+    let produtosFiltrados = produtos.filter(produto => produto.nome.toLowerCase().includes(inputValue));
+    produtosFiltrados.forEach(produto => {
+      let suggestionItem = document.createElement('div');
+      suggestionItem.innerText = produto.nome;
+      suggestionItem.onclick = function() {
+        inputElement.value = produto.nome;
+        suggestionsDiv.innerHTML = '';
+      };
+      suggestionsDiv.appendChild(suggestionItem);
+    });
+  }
+}
+
 // Função para adicionar linha de produto e quantidade
 function adicionarLinhaProdutoQuantidade() {
   let linhaOriginal = document.querySelector('.produto-quantidade');
