@@ -24,7 +24,6 @@
       background-color: #f0f0f0;
     }
 
-    /* Estilização da setinha no campo de seleção */
     .select-container {
       display: flex;
       align-items: center;
@@ -38,9 +37,8 @@
       -moz-appearance: none;
     }
 
-    /* Estilização da setinha para aparecer à esquerda */
     .select-container::before {
-      content: '\25BC'; /* Unicode para setinha */
+      content: '\25BC';
       position: absolute;
       left: 10px;
       font-size: 12px;
@@ -92,15 +90,25 @@
             <input type="text" class="form-control" id="cliente_venda" placeholder="Nome do cliente" required>
             <div id="cliente-suggestions" class="autocomplete-suggestions"></div>
           </div>
-          <div class="form-group autocomplete">
-            <label for="produto_venda">Produto</label>
-            <input type="text" class="form-control" id="produto_venda" placeholder="Nome do produto" required>
-            <div id="produto-suggestions" class="autocomplete-suggestions"></div>
-          </div>
-          <div class="form-group">
-            <label for="quantidade_venda">Quantidade</label>
-            <input type="number" class="form-control" id="quantidade_venda" required>
-          </div>
+          <div id="produto-quantidade-container">
+            <div class="row produto-quantidade">
+              <div class="form-group col-md-1">
+                <button type="button" class="btn btn-outline-primary" onclick="adicionarLinhaProdutoQuantidade()">+</button>
+              </div>
+              <div class="form-group col-md-7 autocomplete">
+                <label for="produto_venda">Produto</label>
+                <input type="text" class="form-control" name="produto_venda" placeholder="Nome do produto" required>
+                <div class="autocomplete-suggestions"></div>
+              </div>
+              <div class="form-group col-md-3">
+                <label for="quantidade_venda">Quantidade</label>
+                <input type="number" class="form-control" name="quantidade_venda" required>
+              </div>
+              <div class="form-group col-md-1">
+                <button type="button" class="btn btn-outline-danger" onclick="removerLinhaProdutoQuantidade(this)">-</button>
+              </div>
+            </div>
+          </div>          
           <div class="form-group">
             <label for="valor_parcial">Valor Parcial</label>
             <input type="text" class="form-control" id="valor_parcial" placeholder="Calculado automaticamente" readonly>
@@ -150,6 +158,6 @@
 
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="js/vendas.js"></script> <!-- Incluindo o arquivo JS separado -->
+  <script src="js/vendas.js"></script>
 </body>
 </html>
