@@ -41,7 +41,7 @@ document.addEventListener('input', function(event) {
     autocompleteProduto(event.target);
   }
   if (event.target && event.target.name === 'quantidade_venda') {
-    calcularValorParcial();
+    atualizarValores();
   }
 });
 
@@ -59,15 +59,15 @@ function autocompleteProduto(inputElement) {
         inputElement.value = produto.nome;
         suggestionsDiv.innerHTML = '';
         inputElement.dataset.preco = produto.precoVenda; // Armazena o preço do produto
-        calcularValorParcial(); // Atualiza os valores parciais e o total
+        atualizarValores(); // Atualiza os valores parciais e o total
       };
       suggestionsDiv.appendChild(suggestionItem);
     });
   }
 }
 
-// Função para calcular o valor parcial de todas as linhas e exibir o total
-function calcularValorParcial() {
+// Função para atualizar valores parciais de todas as linhas e o valor total com desconto
+function atualizarValores() {
   let linhasProdutos = document.querySelectorAll('.produto-quantidade');
   let valorTotalParcial = 0;
 
@@ -83,7 +83,37 @@ function calcularValorParcial() {
 
   // Atualiza o valor parcial total no campo correspondente
   document.getElementById('valor_parcial').value = valorTotalParcial.toFixed(2);
+
+  // Aplica desconto ao valor total
+  calcularValorTotalComDesconto(valorTotalParcial);
 }
+
+// Função para calcular o valor total com desconto
+function calcularValorTotalComDesconto(valorParcial) {
+  let desconto = parseFloat(document.getElementById('desconto').value) || 0;
+  let tipoDesconto = document.getElementById('tipo_desconto').value;
+  let valorTotal = valorParcial;
+
+  if (tipoDesconto === 'reais') {
+    valorTotal -= desconto; // Aplica desconto em reais
+  } else if (tipoDesconto === 'percentual') {
+    valorTotal -= valorParcial * (desconto / 100); // Aplica desconto percentual
+  }
+
+  // Atualiza o campo de valor total
+  document.getElementById('valor_total').value = valorTotal.toFixed(2);
+}
+
+// Eventos para recalcular o total quando o desconto ou tipo de desconto for alterado
+document.getElementById('desconto').addEventListener('input', function() {
+  let valorParcial = parseFloat(document.getElementById('valor_parcial').value) || 0;
+  calcularValorTotalComDesconto(valorParcial);
+});
+
+document.getElementById('tipo_desconto').addEventListener('change', function() {
+  let valorParcial = parseFloat(document.getElementById('valor_parcial').value) || 0;
+  calcularValorTotalComDesconto(valorParcial);
+});
 
 // Função para adicionar linha de produto e quantidade
 function adicionarLinhaProdutoQuantidade() {
@@ -102,7 +132,7 @@ function removerLinhaProdutoQuantidade(elemento) {
   let linha = elemento.closest('.produto-quantidade');
   if (document.querySelectorAll('.produto-quantidade').length > 1) {
     linha.remove();
-    calcularValorParcial(); // Recalcula após a remoção
+    atualizarValores(); // Recalcula após a remoção
   } else {
     alert('Não é possível remover a única linha de produto e quantidade.');
   }
