@@ -41,6 +41,7 @@ document.addEventListener('input', function(event) {
     autocompleteProduto(event.target);
   }
   if (event.target && event.target.name === 'quantidade_venda') {
+    limitarQuantidade(event.target);
     atualizarValores();
   }
 });
@@ -63,6 +64,15 @@ function autocompleteProduto(inputElement) {
       };
       suggestionsDiv.appendChild(suggestionItem);
     });
+  }
+}
+
+// Função para limitar a quantidade máxima de cada produto
+function limitarQuantidade(quantidadeInput) {
+  let quantidade = parseInt(quantidadeInput.value) || 0;
+  if (quantidade > 999999999) {
+    quantidadeInput.value = 999999999;
+    alert('A quantidade máxima permitida para cada produto é 999.999.999.');
   }
 }
 
