@@ -35,17 +35,20 @@ document.getElementById('cliente_venda').addEventListener('input', function() {
   }
 });
 
-// Função para autocomplete de produtos
+// Função para autocomplete de produtos e atualizar valor parcial
 document.addEventListener('input', function(event) {
   if (event.target && event.target.name === 'produto_venda') {
     autocompleteProduto(event.target);
+  }
+  if (event.target && event.target.name === 'quantidade_venda') {
+    calcularValorParcial();
   }
 });
 
 function autocompleteProduto(inputElement) {
   let inputValue = inputElement.value.toLowerCase();
-  let suggestionsDiv = inputElement.nextElementSibling; // Localiza a div de sugestões logo após o input
-  suggestionsDiv.innerHTML = ''; // Limpa sugestões anteriores
+  let suggestionsDiv = inputElement.nextElementSibling;
+  suggestionsDiv.innerHTML = '';
 
   if (inputValue.length > 0) {
     let produtosFiltrados = produtos.filter(produto => produto.nome.toLowerCase().includes(inputValue));
@@ -55,10 +58,31 @@ function autocompleteProduto(inputElement) {
       suggestionItem.onclick = function() {
         inputElement.value = produto.nome;
         suggestionsDiv.innerHTML = '';
+        inputElement.dataset.preco = produto.precoVenda; // Armazena o preço do produto
+        calcularValorParcial(); // Atualiza os valores parciais e o total
       };
       suggestionsDiv.appendChild(suggestionItem);
     });
   }
+}
+
+// Função para calcular o valor parcial de todas as linhas e exibir o total
+function calcularValorParcial() {
+  let linhasProdutos = document.querySelectorAll('.produto-quantidade');
+  let valorTotalParcial = 0;
+
+  linhasProdutos.forEach(linha => {
+    let produtoInput = linha.querySelector('[name="produto_venda"]');
+    let precoProduto = parseFloat(produtoInput.dataset.preco || 0);
+    let quantidade = parseInt(linha.querySelector('[name="quantidade_venda"]').value) || 0;
+    let valorParcial = precoProduto * quantidade;
+
+    // Adiciona o valor parcial desta linha ao total
+    valorTotalParcial += valorParcial;
+  });
+
+  // Atualiza o valor parcial total no campo correspondente
+  document.getElementById('valor_parcial').value = valorTotalParcial.toFixed(2);
 }
 
 // Função para adicionar linha de produto e quantidade
@@ -78,12 +102,13 @@ function removerLinhaProdutoQuantidade(elemento) {
   let linha = elemento.closest('.produto-quantidade');
   if (document.querySelectorAll('.produto-quantidade').length > 1) {
     linha.remove();
+    calcularValorParcial(); // Recalcula após a remoção
   } else {
     alert('Não é possível remover a única linha de produto e quantidade.');
   }
 }
 
-// Função para calcular o valor total
+// Função para registrar a venda
 document.getElementById('vendaForm').addEventListener('submit', function(e) {
   e.preventDefault();
   alert('Venda registrada com sucesso!');
