@@ -141,7 +141,13 @@ function removerLinhaProdutoQuantidade(elemento) {
 // Função para registrar a venda
 document.getElementById('vendaForm').addEventListener('submit', function(e) {
   e.preventDefault();
-  alert('Venda registrada com sucesso!');
+  let valorTotal = parseFloat(document.getElementById('valor_total').value);
+
+  if (valorTotal < 0) {
+    alert('Não é possível registrar uma venda com valor total negativo.');
+  } else {
+    alert('Venda registrada com sucesso!');
+  }
 });
 
 // Carregar dados iniciais ao carregar a página
