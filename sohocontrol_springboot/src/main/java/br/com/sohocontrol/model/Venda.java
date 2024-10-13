@@ -1,11 +1,14 @@
 package br.com.sohocontrol.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 public class Venda {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -13,15 +16,17 @@ public class Venda {
     private LocalDate dataVenda;
 
     @ManyToOne
-    @JoinColumn(name = "cliente_id")
+    @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
-    @ManyToOne
-    @JoinColumn(name = "produto_id")
-    private Produto produto;
+    @OneToMany(mappedBy = "venda", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference // Evita referência cíclica na serialização JSON
+    private List<ItemVenda> itens;
 
-    private int quantidade;
     private double valorTotal;
+
+    // Construtores, Getters e Setters
+    public Venda() {}
 
     public Long getId() {
         return id;
@@ -47,20 +52,12 @@ public class Venda {
         this.cliente = cliente;
     }
 
-    public Produto getProduto() {
-        return produto;
+    public List<ItemVenda> getItens() {
+        return itens;
     }
 
-    public void setProduto(Produto produto) {
-        this.produto = produto;
-    }
-
-    public int getQuantidade() {
-        return quantidade;
-    }
-
-    public void setQuantidade(int quantidade) {
-        this.quantidade = quantidade;
+    public void setItens(List<ItemVenda> itens) {
+        this.itens = itens;
     }
 
     public double getValorTotal() {

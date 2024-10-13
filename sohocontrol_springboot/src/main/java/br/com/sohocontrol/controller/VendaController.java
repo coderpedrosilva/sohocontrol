@@ -1,5 +1,7 @@
 package br.com.sohocontrol.controller;
 
+import br.com.sohocontrol.dto.VendaDTO;
+import br.com.sohocontrol.model.ItemVenda;
 import br.com.sohocontrol.model.Produto;
 import br.com.sohocontrol.model.Venda;
 import br.com.sohocontrol.repository.ProdutoRepository;
@@ -8,7 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/vendas")
@@ -24,24 +29,60 @@ public class VendaController {
 
     @PostMapping
     public ResponseEntity<?> createVenda(@RequestBody Venda venda) {
-        Produto produto = produtoRepository.findById(venda.getProduto().getId()).orElseThrow(() -> new RuntimeException("Produto não encontrado"));
-
-        // Verificar se há quantidade suficiente no estoque
-        if (produto.getQuantidade() < venda.getQuantidade()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Quantidade insuficiente em estoque");
+        if (venda.getCliente() == null || venda.getCliente().getId() == null) {
+            return errorResponse("Cliente não informado ou inválido.", HttpStatus.BAD_REQUEST);
         }
 
-        // Reduzir a quantidade no estoque
-        produto.setQuantidade(produto.getQuantidade() - venda.getQuantidade());
-        produtoRepository.save(produto);
+        double valorTotal = 0.0;
 
-        // Salvar a venda
+        // Itera sobre cada item da venda para calcular o valor total e ajustar o estoque
+        for (ItemVenda item : venda.getItens()) {
+            Produto produto = produtoRepository.findById(item.getProduto().getId())
+                    .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+
+            // Verificar quantidade no estoque
+            if (produto.getQuantidade() < item.getQuantidade()) {
+                return errorResponse("Quantidade insuficiente em estoque para o produto " + produto.getNome(), HttpStatus.BAD_REQUEST);
+            }
+
+            // Reduz a quantidade no estoque do produto
+            produto.setQuantidade(produto.getQuantidade() - item.getQuantidade());
+            produtoRepository.save(produto);
+
+            // Calcula o valor parcial deste item (quantidade * preço de venda) e adiciona ao valor total da venda
+            valorTotal += item.getQuantidade() * produto.getPrecoVenda();
+
+            // Associa o item à venda
+            item.setVenda(venda);
+        }
+
+        // Define o valor total calculado na venda
+        venda.setValorTotal(valorTotal);
+
+        // Salva a venda com os itens e o valor total atualizado
         vendaRepository.save(venda);
+
         return ResponseEntity.ok(venda);
     }
 
+    private ResponseEntity<Map<String, String>> errorResponse(String message, HttpStatus status) {
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("error", message);
+        return ResponseEntity.status(status).body(errorMap);
+    }
+
     @GetMapping
-    public List<Venda> getAllVendas() {
-        return vendaRepository.findAll();
+    public ResponseEntity<List<VendaDTO>> getAllVendas() {
+        List<VendaDTO> vendasDto = vendaRepository.findAll().stream().map(venda -> new VendaDTO(
+                venda.getId(),
+                venda.getDataVenda(),
+                venda.getCliente().getNome(),
+                venda.getItens().stream().map(item -> item.getProduto().getNome()).collect(Collectors.joining(", ")),
+                venda.getItens().stream().map(item -> String.valueOf(item.getQuantidade())).collect(Collectors.joining(", ")),
+                venda.getItens().stream().map(item -> String.format("%.2f", item.getProduto().getPrecoVenda())).collect(Collectors.joining(", ")),
+                venda.getValorTotal() // Valor total da venda agora está sendo corretamente enviado
+        )).collect(Collectors.toList());
+
+        return ResponseEntity.ok(vendasDto);
     }
 }
