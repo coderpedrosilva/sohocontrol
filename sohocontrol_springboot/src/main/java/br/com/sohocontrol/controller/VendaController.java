@@ -60,7 +60,7 @@ public class VendaController {
 
     @GetMapping
     public ResponseEntity<List<VendaDTO>> getAllVendas() {
-        List<VendaDTO> vendasDto = vendaRepository.findAll().stream().map(venda -> {
+        List<VendaDTO> vendasDto = vendaRepository.findAllOrderByDataAndIdDesc().stream().map(venda -> {
             double valorFinal = venda.getValorTotal();
             String descontoInfo = "";
 
@@ -73,7 +73,7 @@ public class VendaController {
                 }
             }
 
-            // Formata o valor total como uma string com duas casas decimais, sem modificá-lo no frontend
+            // Formata o valor total como uma string com duas casas decimais
             String valorTotalFormatado = String.format("%.2f%s", valorFinal, descontoInfo);
 
             return new VendaDTO(
@@ -91,5 +91,6 @@ public class VendaController {
 
         return ResponseEntity.ok(vendasDto);
     }
+
 
 }
