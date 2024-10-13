@@ -29,37 +29,29 @@ public class VendaController {
 
     @PostMapping
     public ResponseEntity<?> createVenda(@RequestBody Venda venda) {
+        System.out.println("Recebendo requisição de venda: " + venda);
+
         if (venda.getCliente() == null || venda.getCliente().getId() == null) {
             return errorResponse("Cliente não informado ou inválido.", HttpStatus.BAD_REQUEST);
         }
 
-        double valorTotal = 0.0;
+        double valorTotalComDesconto = venda.getValorTotal(); // Valor já calculado com desconto no frontend
 
-        // Itera sobre cada item da venda para calcular o valor total e ajustar o estoque
-        for (ItemVenda item : venda.getItens()) {
+        venda.setValorTotal(valorTotalComDesconto); // Salva o valor com desconto
+
+        venda.getItens().forEach(item -> {
             Produto produto = produtoRepository.findById(item.getProduto().getId())
                     .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
-            // Verificar quantidade no estoque
             if (produto.getQuantidade() < item.getQuantidade()) {
-                return errorResponse("Quantidade insuficiente em estoque para o produto " + produto.getNome(), HttpStatus.BAD_REQUEST);
+                throw new RuntimeException("Quantidade insuficiente em estoque para o produto " + produto.getNome());
             }
 
-            // Reduz a quantidade no estoque do produto
             produto.setQuantidade(produto.getQuantidade() - item.getQuantidade());
             produtoRepository.save(produto);
-
-            // Calcula o valor parcial deste item (quantidade * preço de venda) e adiciona ao valor total da venda
-            valorTotal += item.getQuantidade() * produto.getPrecoVenda();
-
-            // Associa o item à venda
             item.setVenda(venda);
-        }
+        });
 
-        // Define o valor total calculado na venda
-        venda.setValorTotal(valorTotal);
-
-        // Salva a venda com os itens e o valor total atualizado
         vendaRepository.save(venda);
 
         return ResponseEntity.ok(venda);
@@ -80,7 +72,7 @@ public class VendaController {
                 venda.getItens().stream().map(item -> item.getProduto().getNome()).collect(Collectors.joining(", ")),
                 venda.getItens().stream().map(item -> String.valueOf(item.getQuantidade())).collect(Collectors.joining(", ")),
                 venda.getItens().stream().map(item -> String.format("%.2f", item.getProduto().getPrecoVenda())).collect(Collectors.joining(", ")),
-                venda.getValorTotal() // Valor total da venda agora está sendo corretamente enviado
+                venda.getValorTotal()
         )).collect(Collectors.toList());
 
         return ResponseEntity.ok(vendasDto);
