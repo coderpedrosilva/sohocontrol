@@ -1,7 +1,6 @@
 package br.com.sohocontrol.controller;
 
 import br.com.sohocontrol.dto.VendaDTO;
-import br.com.sohocontrol.model.ItemVenda;
 import br.com.sohocontrol.model.Produto;
 import br.com.sohocontrol.model.Venda;
 import br.com.sohocontrol.repository.ProdutoRepository;
@@ -35,10 +34,6 @@ public class VendaController {
             return errorResponse("Cliente não informado ou inválido.", HttpStatus.BAD_REQUEST);
         }
 
-        double valorTotalComDesconto = venda.getValorTotal(); // Valor já calculado com desconto no frontend
-
-        venda.setValorTotal(valorTotalComDesconto); // Salva o valor com desconto
-
         venda.getItens().forEach(item -> {
             Produto produto = produtoRepository.findById(item.getProduto().getId())
                     .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
@@ -65,16 +60,36 @@ public class VendaController {
 
     @GetMapping
     public ResponseEntity<List<VendaDTO>> getAllVendas() {
-        List<VendaDTO> vendasDto = vendaRepository.findAll().stream().map(venda -> new VendaDTO(
-                venda.getId(),
-                venda.getDataVenda(),
-                venda.getCliente().getNome(),
-                venda.getItens().stream().map(item -> item.getProduto().getNome()).collect(Collectors.joining(", ")),
-                venda.getItens().stream().map(item -> String.valueOf(item.getQuantidade())).collect(Collectors.joining(", ")),
-                venda.getItens().stream().map(item -> String.format("%.2f", item.getProduto().getPrecoVenda())).collect(Collectors.joining(", ")),
-                venda.getValorTotal()
-        )).collect(Collectors.toList());
+        List<VendaDTO> vendasDto = vendaRepository.findAll().stream().map(venda -> {
+            double valorFinal = venda.getValorTotal();
+            String descontoInfo = "";
+
+            // Verifica se há um desconto aplicado e adiciona a informação do desconto
+            if (venda.getDescontoAplicado() != null && venda.getDescontoAplicado() > 0) {
+                if ("reais".equalsIgnoreCase(venda.getTipoDesconto())) {
+                    descontoInfo = String.format(" (Desconto de R$ %.2f)", venda.getDescontoAplicado());
+                } else if ("percentual".equalsIgnoreCase(venda.getTipoDesconto())) {
+                    descontoInfo = String.format(" (Desconto de %.0f%%)", venda.getDescontoAplicado());
+                }
+            }
+
+            // Formata o valor total como uma string com duas casas decimais, sem modificá-lo no frontend
+            String valorTotalFormatado = String.format("%.2f%s", valorFinal, descontoInfo);
+
+            return new VendaDTO(
+                    venda.getId(),
+                    venda.getDataVenda(),
+                    venda.getCliente().getNome(),
+                    venda.getItens().stream().map(item -> item.getProduto().getNome()).collect(Collectors.joining(", ")),
+                    venda.getItens().stream().map(item -> String.valueOf(item.getQuantidade())).collect(Collectors.joining(", ")),
+                    venda.getItens().stream().map(item -> String.format("%.2f", item.getProduto().getPrecoVenda())).collect(Collectors.joining(", ")),
+                    valorTotalFormatado,
+                    venda.getDescontoAplicado() != null ? venda.getDescontoAplicado() : 0.0,
+                    venda.getTipoDesconto() != null ? venda.getTipoDesconto() : ""
+            );
+        }).collect(Collectors.toList());
 
         return ResponseEntity.ok(vendasDto);
     }
+
 }

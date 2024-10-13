@@ -41,6 +41,7 @@ function exibirProdutos() {
   }
 }
 
+// Função para carregar e exibir vendas com o valor e frase de desconto
 function carregarVendas() {
   fetch('http://localhost:8080/api/vendas')
     .then(response => response.json())
@@ -64,7 +65,9 @@ function carregarVendas() {
         novaLinha.insertCell().innerText = venda.nomeProdutos;
         novaLinha.insertCell().innerText = venda.quantidades;
         novaLinha.insertCell().innerText = venda.precosVenda;
-        novaLinha.insertCell().innerText = parseFloat(venda.valorTotal).toFixed(2);
+
+        // Exibe o valor total já formatado retornado do backend, sem alterações adicionais
+        novaLinha.insertCell().innerText = venda.valorTotal;
       });
     })
     .catch(error => console.error('Erro ao carregar vendas:', error));
@@ -167,8 +170,15 @@ function calcularValorTotalComDesconto(valorParcial) {
     valorTotal -= valorParcial * (desconto / 100); // Aplica desconto percentual
   }
 
-  // Atualiza o campo de valor total
-  document.getElementById('valor_total').value = valorTotal.toFixed(2);
+  // Se o valor total após desconto for negativo, ajuste para zero
+  valorTotal = valorTotal < 0 ? 0 : valorTotal;
+
+  // Exibe a frase do valor total com desconto
+  let valorTotalDisplay = valorTotal.toFixed(2);
+  if (desconto > 0) {
+    valorTotalDisplay += tipoDesconto === 'reais' ? ` (Desconto de R$ ${desconto.toFixed(2)})` : ` (Desconto de ${desconto.toFixed(0)}%)`;
+  }
+  document.getElementById('valor_total').value = valorTotalDisplay;
 }
 
 // Eventos para recalcular o total quando o desconto ou tipo de desconto for alterado
@@ -215,12 +225,11 @@ function removerLinhaProdutoQuantidade(elemento) {
   }
 }
 
-// Função para registrar a venda
+// Função para registrar a venda e resetar a tela ao finalizar
 document.getElementById('vendaForm').addEventListener('submit', function(e) {
   e.preventDefault();
 
   const clienteId = parseInt(document.getElementById('cliente_venda').dataset.clienteId, 10);
-  console.log("Cliente ID:", clienteId);
   if (!clienteId) {
     alert("Cliente não selecionado corretamente.");
     return;
@@ -231,7 +240,6 @@ document.getElementById('vendaForm').addEventListener('submit', function(e) {
     const produtoId = parseInt(linha.querySelector('[name="produto_venda"]').dataset.produtoId, 10);
     const quantidade = parseInt(linha.querySelector('[name="quantidade_venda"]').value) || 0;
 
-    console.log("Produto ID:", produtoId, "Quantidade:", quantidade);
     if (!produtoId) {
       alert("Produto não selecionado corretamente.");
       throw new Error("Produto não informado ou inválido.");
@@ -243,16 +251,17 @@ document.getElementById('vendaForm').addEventListener('submit', function(e) {
   });
 
   const valorTotal = parseFloat(document.getElementById('valor_total').value) || 0;
-  console.log("Valor Total:", valorTotal);
+  const desconto = parseFloat(document.getElementById('desconto').value) || 0;
+  const tipoDesconto = document.getElementById('tipo_desconto').value;
 
   const venda = {
     dataVenda: document.getElementById('data_venda').value,
     cliente: { id: clienteId },
     itens: itens,
-    valorTotal: valorTotal.toFixed(2)
+    valorTotal: valorTotal.toFixed(2), // Valor total calculado com desconto
+    descontoAplicado: desconto,
+    tipoDesconto: tipoDesconto
   };
-  console.log("Venda a ser enviada:", venda);
-  console.log("Venda a ser enviada (JSON):", JSON.stringify(venda));
 
   fetch('http://localhost:8080/api/vendas', {
     method: 'POST',
@@ -271,6 +280,7 @@ document.getElementById('vendaForm').addEventListener('submit', function(e) {
       document.getElementById('valor_parcial').value = '';
       document.getElementById('valor_total').value = '';
       carregarProdutos(); // Recarrega a lista de produtos para refletir a nova quantidade
+      carregarVendas(); // Atualiza a lista de vendas
     })
     .catch(error => {
       console.error("Erro ao registrar a venda:", error.message);

@@ -25,6 +25,9 @@ public class Venda {
 
     private double valorTotal;
 
+    private Double descontoAplicado; // Alterado para Double
+    private String tipoDesconto; // Tipo de desconto (reais ou percentual)
+
     // Construtores, Getters e Setters
     public Venda() {}
 
@@ -66,5 +69,21 @@ public class Venda {
 
     public void setValorTotal(double valorTotal) {
         this.valorTotal = valorTotal;
+    }
+
+    public Double getDescontoAplicado() {
+        return descontoAplicado;
+    }
+
+    public void setDescontoAplicado(Double descontoAplicado) {
+        this.descontoAplicado = descontoAplicado;
+    }
+
+    public String getTipoDesconto() {
+        return tipoDesconto;
+    }
+
+    public void setTipoDesconto(String tipoDesconto) {
+        this.tipoDesconto = tipoDesconto;
     }
 }

@@ -6,12 +6,15 @@ public class VendaDTO {
     private Long codigoVenda;
     private LocalDate dataVenda;
     private String nomeCliente;
-    private String nomeProdutos; // Nomes dos produtos em uma String única, separados por vírgula
-    private String quantidades; // Quantidades dos itens, também em uma String separada por vírgula
-    private String precosVenda; // Preços dos itens, em String separada por vírgula
-    private double valorTotal;
+    private String nomeProdutos;
+    private String quantidades;
+    private String precosVenda;
+    private String valorTotal; // Alterado para String para permitir a frase de desconto
+    private double descontoAplicado;
+    private String tipoDesconto;
 
-    public VendaDTO(Long codigoVenda, LocalDate dataVenda, String nomeCliente, String nomeProdutos, String quantidades, String precosVenda, double valorTotal) {
+    // Construtor completo incluindo os novos campos de desconto
+    public VendaDTO(Long codigoVenda, LocalDate dataVenda, String nomeCliente, String nomeProdutos, String quantidades, String precosVenda, String valorTotal, double descontoAplicado, String tipoDesconto) {
         this.codigoVenda = codigoVenda;
         this.dataVenda = dataVenda;
         this.nomeCliente = nomeCliente;
@@ -19,8 +22,11 @@ public class VendaDTO {
         this.quantidades = quantidades;
         this.precosVenda = precosVenda;
         this.valorTotal = valorTotal;
+        this.descontoAplicado = descontoAplicado;
+        this.tipoDesconto = tipoDesconto;
     }
 
+    // Getters e Setters
     public Long getCodigoVenda() {
         return codigoVenda;
     }
@@ -69,11 +75,27 @@ public class VendaDTO {
         this.precosVenda = precosVenda;
     }
 
-    public double getValorTotal() {
+    public String getValorTotal() {
         return valorTotal;
     }
 
-    public void setValorTotal(double valorTotal) {
+    public void setValorTotal(String valorTotal) {
         this.valorTotal = valorTotal;
+    }
+
+    public double getDescontoAplicado() {
+        return descontoAplicado;
+    }
+
+    public void setDescontoAplicado(double descontoAplicado) {
+        this.descontoAplicado = descontoAplicado;
+    }
+
+    public String getTipoDesconto() {
+        return tipoDesconto;
+    }
+
+    public void setTipoDesconto(String tipoDesconto) {
+        this.tipoDesconto = tipoDesconto;
     }
 }
