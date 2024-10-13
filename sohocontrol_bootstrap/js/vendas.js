@@ -279,6 +279,13 @@ document.getElementById('vendaForm').addEventListener('submit', function(e) {
       document.getElementById('vendaForm').reset();
       document.getElementById('valor_parcial').value = '';
       document.getElementById('valor_total').value = '';
+
+      // Remove todas as linhas de produto, exceto a primeira, para voltar ao estado inicial
+      const container = document.getElementById('produto-quantidade-container');
+      while (container.children.length > 1) {
+        container.removeChild(container.lastChild);
+      }
+
       carregarProdutos(); // Recarrega a lista de produtos para refletir a nova quantidade
       carregarVendas(); // Atualiza a lista de vendas
     })
