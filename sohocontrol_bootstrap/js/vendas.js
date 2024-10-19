@@ -1,6 +1,8 @@
 // Variáveis globais para armazenar clientes, produtos e o próximo código de venda
 let clientes = [];
 let produtos = [];
+// Variável para armazenar as sugestões de busca
+let busca = [];
 let proximoCodigoVenda = 1000; // Inicia o código de venda em 1000
 
 // Função para carregar dados iniciais de clientes e produtos
@@ -336,6 +338,109 @@ function calcularValorTotalComDesconto(valorParcial) {
   document.getElementById('valor_total').value = valorTotalDisplay;
 }
 
+// Função para carregar dados no autocomplete de busca (clientes e produtos)
+function carregarDadosBusca() {
+  const campoBusca = document.getElementById('buscarVenda');
+  const suggestionsDiv = document.createElement('div');
+  suggestionsDiv.classList.add('autocomplete-suggestions');
+  campoBusca.parentNode.appendChild(suggestionsDiv);
+
+  // Adiciona sugestões de clientes
+  clientes.forEach(cliente => {
+    let suggestionItem = document.createElement('div');
+    suggestionItem.innerText = cliente.nome;
+    suggestionItem.addEventListener('click', function() {
+      campoBusca.value = cliente.nome;
+      filtrarLinhasTabela(cliente.nome.toLowerCase());
+      suggestionsDiv.innerHTML = ''; // Limpa as sugestões após a seleção
+    });
+    suggestionsDiv.appendChild(suggestionItem);
+  });
+
+  // Adiciona sugestões de produtos
+  produtos.forEach(produto => {
+    let suggestionItem = document.createElement('div');
+    suggestionItem.innerText = produto.nome;
+    suggestionItem.addEventListener('click', function() {
+      campoBusca.value = produto.nome;
+      filtrarLinhasTabela(produto.nome.toLowerCase());
+      suggestionsDiv.innerHTML = ''; // Limpa as sugestões após a seleção
+    });
+    suggestionsDiv.appendChild(suggestionItem);
+  });
+
+  // Exibe sugestões conforme o usuário digita
+  campoBusca.addEventListener('input', function() {
+    const termoBusca = this.value.toLowerCase();
+    suggestionsDiv.innerHTML = '';
+
+    if (termoBusca.length > 0) {
+      clientes.filter(cliente => cliente.nome.toLowerCase().includes(termoBusca))
+        .forEach(cliente => {
+          let suggestionItem = document.createElement('div');
+          suggestionItem.innerText = cliente.nome;
+          suggestionItem.addEventListener('click', function() {
+            campoBusca.value = cliente.nome;
+            filtrarLinhasTabela(cliente.nome.toLowerCase());
+            suggestionsDiv.innerHTML = '';
+          });
+          suggestionsDiv.appendChild(suggestionItem);
+        });
+
+      produtos.filter(produto => produto.nome.toLowerCase().includes(termoBusca))
+        .forEach(produto => {
+          let suggestionItem = document.createElement('div');
+          suggestionItem.innerText = produto.nome;
+          suggestionItem.addEventListener('click', function() {
+            campoBusca.value = produto.nome;
+            filtrarLinhasTabela(produto.nome.toLowerCase());
+            suggestionsDiv.innerHTML = '';
+          });
+          suggestionsDiv.appendChild(suggestionItem);
+        });
+    }
+  });
+}
+
+// Função para o autocomplete na busca por clientes ou produtos
+document.getElementById('buscarVenda').addEventListener('input', function() {
+  const inputValue = this.value.toLowerCase();
+  const suggestionsDiv = document.getElementById('buscar-suggestions');
+  suggestionsDiv.innerHTML = '';
+
+  if (inputValue.length > 0) {
+    const resultadosFiltrados = busca.filter(item => item.nome.toLowerCase().includes(inputValue));
+
+    // Exibir os resultados filtrados no campo de autocomplete
+    resultadosFiltrados.forEach(item => {
+      const suggestionItem = document.createElement('div');
+      suggestionItem.innerText = `${item.nome} (${item.tipo})`;
+      suggestionItem.onclick = function() {
+        document.getElementById('buscarVenda').value = item.nome;
+        suggestionsDiv.innerHTML = '';
+      };
+      suggestionsDiv.appendChild(suggestionItem);
+    });
+  }
+});
+
+// Adiciona evento ao campo de busca
+document.getElementById('buscarVenda').addEventListener('input', function() {
+  const termoBusca = this.value.toLowerCase();
+  const linhasVendas = document.querySelectorAll('#tabelaVendas tbody tr');
+
+  linhasVendas.forEach(linha => {
+    const cliente = linha.cells[2].innerText.toLowerCase();
+    const produto = linha.cells[3].innerText.toLowerCase();
+
+    if (cliente.includes(termoBusca) || produto.includes(termoBusca)) {
+      linha.style.display = ''; // Mostra a linha que corresponde ao termo de busca
+    } else {
+      linha.style.display = 'none'; // Oculta a linha que não corresponde
+    }
+  });
+});
+
 // Eventos para recalcular o total quando o desconto ou tipo de desconto for alterado
 document.getElementById('desconto').addEventListener('input', function() {
   let valorParcial = parseFloat(document.getElementById('valor_parcial').value) || 0;
@@ -345,6 +450,11 @@ document.getElementById('desconto').addEventListener('input', function() {
 document.getElementById('tipo_desconto').addEventListener('change', function() {
   let valorParcial = parseFloat(document.getElementById('valor_parcial').value) || 0;
   calcularValorTotalComDesconto(valorParcial);
+});
+
+// Adiciona evento ao campo de busca
+document.getElementById('buscarVenda').addEventListener('input', function() {
+  filtrarLinhasTabela(this.value.toLowerCase());
 });
 
 // Função para adicionar linha de produto e quantidade
@@ -450,8 +560,25 @@ document.getElementById('vendaForm').addEventListener('submit', function(e) {
     });
 });
 
+// Função para filtrar linhas da tabela de vendas com base no termo de busca
+function filtrarLinhasTabela(termoBusca) {
+  const linhasVendas = document.querySelectorAll('#tabelaVendas tbody tr');
+
+  linhasVendas.forEach(linha => {
+    const cliente = linha.cells[2].innerText.toLowerCase();
+    const produto = linha.cells[3].innerText.toLowerCase();
+
+    if (cliente.includes(termoBusca) || produto.includes(termoBusca)) {
+      linha.style.display = ''; // Mostra a linha que corresponde ao termo de busca
+    } else {
+      linha.style.display = 'none'; // Oculta a linha que não corresponde
+    }
+  });
+}
+
 // Função para carregar todos os dados iniciais ao carregar a página
 document.addEventListener('DOMContentLoaded', function() {
   carregarDadosIniciais(); // Carrega clientes e produtos
   carregarVendas(); // Carrega e exibe as vendas
+  carregarDadosBusca(); // Carrega dados para o autocomplete de busca
 });

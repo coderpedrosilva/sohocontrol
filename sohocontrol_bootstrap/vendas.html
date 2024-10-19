@@ -170,9 +170,10 @@
 
       <div class="tab-pane fade" id="visualizar-venda" role="tabpanel" aria-labelledby="visualizar-venda-tab">
         <h2 class="mt-4">Visualizar Vendas</h2>
-        <div class="form-group">
+        <div class="form-group autocomplete">
           <label for="buscarVenda">Buscar por Cliente ou Produto:</label>
           <input type="text" class="form-control" id="buscarVenda" placeholder="Digite o nome do cliente ou produto">
+          <div id="buscar-suggestions" class="autocomplete-suggestions"></div>
         </div>
         <table class="table table-striped" id="tabelaVendas">
           <thead>
