@@ -7,11 +7,32 @@ let proximoCodigoVenda = 1000; // Inicia o código de venda em 1000
 function carregarDadosIniciais() {
   fetch('http://localhost:8080/api/clientes')
     .then(response => response.json())
-    .then(data => { clientes = data; })
+    .then(data => {
+      // Ordena os clientes por nome em ordem alfabética
+      clientes = data.sort((a, b) => a.nome.localeCompare(b.nome)); 
+    })
     .catch(error => console.error('Erro ao buscar clientes:', error));
 
   carregarProdutos(); // Carrega a lista de produtos
 }
+
+// Mostrar a lista de todos os clientes ao clicar no campo "Cliente"
+document.getElementById('cliente_venda').addEventListener('click', function() {
+  const suggestionsDiv = document.getElementById('cliente-suggestions');
+  suggestionsDiv.innerHTML = ''; // Limpar sugestões anteriores
+
+  // Criar uma sugestão para cada cliente carregado
+  clientes.forEach(cliente => {
+    let suggestionItem = document.createElement('div');
+    suggestionItem.innerText = cliente.nome;
+    suggestionItem.onclick = function() {
+      document.getElementById('cliente_venda').value = cliente.nome;
+      document.getElementById('cliente_venda').dataset.clienteId = cliente.id;
+      suggestionsDiv.innerHTML = ''; // Limpar sugestões após a seleção
+    };
+    suggestionsDiv.appendChild(suggestionItem);
+  });
+});
 
 // Função para carregar e exibir produtos
 function carregarProdutos() {
@@ -113,16 +134,29 @@ document.getElementById('cliente_venda').addEventListener('input', function() {
 
   if (input.length > 0) {
     let clientesFiltrados = clientes.filter(cliente => cliente.nome.toLowerCase().includes(input));
+
+    // Exibe os clientes filtrados
     clientesFiltrados.forEach(cliente => {
       let suggestionItem = document.createElement('div');
       suggestionItem.innerText = cliente.nome;
       suggestionItem.onclick = function() {
         document.getElementById('cliente_venda').value = cliente.nome;
         document.getElementById('cliente_venda').dataset.clienteId = cliente.id; // Armazena o ID do cliente
-        suggestionsDiv.innerHTML = '';
+        suggestionsDiv.innerHTML = ''; // Esconde as sugestões após a seleção
       };
       suggestionsDiv.appendChild(suggestionItem);
     });
+  }
+});
+
+// Fecha a lista de sugestões ao clicar fora do campo ou das sugestões
+document.addEventListener('click', function(event) {
+  const inputField = document.getElementById('cliente_venda');
+  const suggestionsDiv = document.getElementById('cliente-suggestions');
+
+  // Se o clique não ocorreu no campo de entrada nem na lista de sugestões
+  if (event.target !== inputField && !suggestionsDiv.contains(event.target)) {
+    suggestionsDiv.innerHTML = ''; // Esconde a lista de sugestões
   }
 });
 
@@ -344,3 +378,6 @@ document.addEventListener('DOMContentLoaded', function() {
   carregarDadosIniciais(); // Carrega clientes e produtos
   carregarVendas(); // Carrega e exibe as vendas
 });
+
+// Carregar dados iniciais ao iniciar
+document.addEventListener('DOMContentLoaded', carregarDadosIniciais);
