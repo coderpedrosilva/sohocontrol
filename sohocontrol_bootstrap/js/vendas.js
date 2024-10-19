@@ -65,9 +65,17 @@ function carregarVendas() {
         novaLinha.insertCell().innerText = venda.nomeProdutos;
         novaLinha.insertCell().innerText = venda.quantidades;
         novaLinha.insertCell().innerText = venda.precosVenda;
-
-        // Exibe o valor total já formatado retornado do backend, sem alterações adicionais
         novaLinha.insertCell().innerText = venda.valorTotal;
+
+        // Coluna de Ações com os ícones
+        const acoesCell = novaLinha.insertCell();
+        acoesCell.innerHTML = `
+          <div class="icon-container">
+            <i class="fa-regular fa-file-image" onclick="baixarComprovante('png', ${venda.codigoVenda})"></i>
+            <i class="fa-solid fa-file-pdf" onclick="baixarComprovante('pdf', ${venda.codigoVenda})"></i>
+            <i class="fa-solid fa-trash" onclick="deletarVenda(${venda.codigoVenda})"></i>
+          </div>
+        `;
       });
     })
     .catch(error => console.error('Erro ao carregar vendas:', error));
@@ -94,6 +102,13 @@ document.getElementById('cliente_venda').addEventListener('input', function() {
   }
 });
 
+// Função para verificar se um produto já foi selecionado
+function produtoJaSelecionado(produtoId) {
+  let produtosSelecionados = Array.from(document.querySelectorAll('[name="produto_venda"]'))
+    .map(input => input.dataset.produtoId);
+  return produtosSelecionados.includes(produtoId.toString());
+}
+
 // Função para autocomplete de produtos e atualizar valor parcial
 document.addEventListener('input', function(event) {
   if (event.target && event.target.name === 'produto_venda') {
@@ -116,6 +131,11 @@ function autocompleteProduto(inputElement) {
       let suggestionItem = document.createElement('div');
       suggestionItem.innerText = produto.nome;
       suggestionItem.onclick = function() {
+        // Verifica se o produto já foi selecionado
+        if (produtoJaSelecionado(produto.id)) {
+          alert('Este produto já foi selecionado. Por favor, escolha um produto diferente.');
+          return; // Impede a seleção de produtos duplicados
+        }
         inputElement.value = produto.nome;
         inputElement.dataset.produtoId = produto.id; // Armazena o ID do produto
         inputElement.dataset.preco = produto.precoVenda; // Armazena o preço do produto
