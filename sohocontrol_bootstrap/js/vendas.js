@@ -38,8 +38,9 @@ document.getElementById('cliente_venda').addEventListener('click', function() {
 function carregarProdutos() {
   fetch('http://localhost:8080/api/produtos')
     .then(response => response.json())
-    .then(data => { 
-      produtos = data; 
+    .then(data => {
+      // Ordena os produtos por nome em ordem alfabética
+      produtos = data.sort((a, b) => a.nome.localeCompare(b.nome)); 
       exibirProdutos(); // Exibe a lista de produtos na interface
     })
     .catch(error => console.error('Erro ao buscar produtos:', error));
@@ -178,22 +179,23 @@ document.addEventListener('input', function(event) {
   }
 });
 
+// Função para autocomplete de produtos e atualizar valor parcial
 function autocompleteProduto(inputElement) {
   let inputValue = inputElement.value.toLowerCase();
   let suggestionsDiv = inputElement.nextElementSibling;
   suggestionsDiv.innerHTML = '';
 
   if (inputValue.length > 0) {
-    let produtosFiltrados = produtos.filter(produto => produto.nome.toLowerCase().includes(inputValue));
+    // Lista apenas produtos não selecionados em outros campos
+    let produtosFiltrados = produtos.filter(produto => 
+      produto.nome.toLowerCase().includes(inputValue) &&
+      !produtoJaSelecionado(produto.id, inputElement)
+    );
+
     produtosFiltrados.forEach(produto => {
       let suggestionItem = document.createElement('div');
       suggestionItem.innerText = produto.nome;
       suggestionItem.onclick = function() {
-        // Verifica se o produto já foi selecionado
-        if (produtoJaSelecionado(produto.id)) {
-          alert('Este produto já foi selecionado. Por favor, escolha um produto diferente.');
-          return; // Impede a seleção de produtos duplicados
-        }
         inputElement.value = produto.nome;
         inputElement.dataset.produtoId = produto.id; // Armazena o ID do produto
         inputElement.dataset.preco = produto.precoVenda; // Armazena o preço do produto
@@ -202,8 +204,83 @@ function autocompleteProduto(inputElement) {
       };
       suggestionsDiv.appendChild(suggestionItem);
     });
+  } else {
+    // Se o campo estiver vazio, limpar o dataset
+    inputElement.dataset.produtoId = '';
+    inputElement.dataset.preco = '';
   }
 }
+
+// Evento para limpar o dataset quando o campo de produto está vazio
+document.addEventListener('input', function(event) {
+  if (event.target && event.target.name === 'produto_venda' && event.target.value === '') {
+    event.target.dataset.produtoId = '';
+    event.target.dataset.preco = '';
+  }
+});
+
+// Mostrar a lista de todos os produtos ao clicar no campo "Produto"
+document.addEventListener('click', function(event) {
+  const produtoInput = event.target;
+  if (produtoInput && produtoInput.name === 'produto_venda') {
+    const suggestionsDiv = produtoInput.nextElementSibling; // Div de sugestões associada
+    suggestionsDiv.innerHTML = ''; // Limpa sugestões anteriores
+
+    // Cria uma sugestão para cada produto carregado
+    produtos.forEach(produto => {
+      if (!produtoJaSelecionado(produto.id)) { // Garante que o produto ainda não foi selecionado
+        let suggestionItem = document.createElement('div');
+        suggestionItem.innerText = produto.nome;
+        suggestionItem.onclick = function() {
+          produtoInput.value = produto.nome;
+          produtoInput.dataset.produtoId = produto.id;
+          produtoInput.dataset.preco = produto.precoVenda;
+          suggestionsDiv.innerHTML = ''; // Limpa sugestões após a seleção
+          atualizarValores(); // Atualiza os valores parciais e total
+        };
+        suggestionsDiv.appendChild(suggestionItem);
+      }
+    });
+  }
+});
+
+// Mostrar a lista de todos os clientes ao clicar no campo "Cliente"
+document.getElementById('cliente_venda').addEventListener('click', function() {
+  const suggestionsDiv = document.getElementById('cliente-suggestions');
+  suggestionsDiv.innerHTML = ''; // Limpar sugestões anteriores
+
+  // Criar uma sugestão para cada cliente carregado
+  clientes.forEach(cliente => {
+    let suggestionItem = document.createElement('div');
+    suggestionItem.innerText = cliente.nome;
+    suggestionItem.onclick = function() {
+      document.getElementById('cliente_venda').value = cliente.nome;
+      document.getElementById('cliente_venda').dataset.clienteId = cliente.id;
+      suggestionsDiv.innerHTML = ''; // Limpar sugestões após a seleção
+    };
+    suggestionsDiv.appendChild(suggestionItem);
+  });
+});
+
+// Fecha a lista de sugestões ao clicar fora do campo ou das sugestões (para o campo de Cliente e Produto)
+document.addEventListener('click', function(event) {
+  const clienteInput = document.getElementById('cliente_venda');
+  const clienteSuggestionsDiv = document.getElementById('cliente-suggestions');
+  const produtoInputs = document.querySelectorAll('[name="produto_venda"]');
+
+  // Fecha a lista de sugestões de cliente
+  if (event.target !== clienteInput && !clienteSuggestionsDiv.contains(event.target)) {
+    clienteSuggestionsDiv.innerHTML = ''; // Esconde a lista de sugestões de clientes
+  }
+
+  // Fecha a lista de sugestões de produto
+  produtoInputs.forEach(produtoInput => {
+    const produtoSuggestionsDiv = produtoInput.nextElementSibling;
+    if (event.target !== produtoInput && !produtoSuggestionsDiv.contains(event.target)) {
+      produtoSuggestionsDiv.innerHTML = ''; // Esconde a lista de sugestões de produtos
+    }
+  });
+});
 
 // Função para limitar a quantidade máxima de cada produto
 function limitarQuantidade(quantidadeInput) {
@@ -378,6 +455,3 @@ document.addEventListener('DOMContentLoaded', function() {
   carregarDadosIniciais(); // Carrega clientes e produtos
   carregarVendas(); // Carrega e exibe as vendas
 });
-
-// Carregar dados iniciais ao iniciar
-document.addEventListener('DOMContentLoaded', carregarDadosIniciais);
