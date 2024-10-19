@@ -8,6 +8,9 @@ import java.util.List;
 
 public interface VendaRepository extends JpaRepository<Venda, Long> {
 
+    @Query("SELECT v FROM Venda v WHERE v.cliente.id = :clienteId")
+    List<Venda> findByClienteId(Long clienteId);
+
     @Query("SELECT v FROM Venda v ORDER BY v.dataVenda DESC, v.id DESC")
     List<Venda> findAllOrderByDataAndIdDesc();
 }

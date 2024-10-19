@@ -4,19 +4,20 @@
   <meta charset="UTF-8">
   <title>Clientes</title>
   <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="fontawesome/css/all.min.css">
   <style>
     /* Ajuste para a setinha no campo de seleção do Estado */
     .select-container {
       position: relative;
     }
-
+  
     .select-container select {
       appearance: none;
       -webkit-appearance: none;
       -moz-appearance: none;
       padding-right: 25px; /* Espaço para a setinha */
     }
-
+  
     /* Estilização da setinha para aparecer à direita */
     .select-container::after {
       content: '\25BC'; /* Unicode para setinha */
@@ -26,7 +27,43 @@
       transform: translateY(-50%);
       pointer-events: none;
     }
+  
+    /* Estilo para o contêiner de ícones */
+    .icon-container {
+      display: flex;
+      align-items: center;
+      gap: 10px; /* Espaçamento entre os ícones */
+    }
+  
+    .icon-container i {
+      cursor: pointer;
+      font-size: 20px;
+      transition: transform 0.2s;
+    }
+  
+    .icon-container i:hover {
+      transform: scale(1.2);
+    }
+  
+    /* Cores para os ícones */
+    .fa-pen-to-square {
+      color: #007bff; 
+    }
+  
+    .fa-floppy-disk {
+      color: #28a745; 
+    }
+  
+    .fa-trash {
+      color: #dc3545;
+    }
+  
+    /* Ocultar ícone de salvar inicialmente */
+    .d-none {
+      display: none;
+    }
   </style>
+  
 </head>
 <body>
   <!-- Navbar -->
@@ -147,6 +184,7 @@
               <th>Estado</th>
               <th>Telefone</th>
               <th>E-mail</th>
+              <th>Ações</th> 
             </tr>
           </thead>
           <tbody>
