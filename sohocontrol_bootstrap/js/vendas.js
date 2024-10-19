@@ -41,6 +41,30 @@ function exibirProdutos() {
   }
 }
 
+// Função para deletar uma venda
+function deletarVenda(codigoVenda, linhaElemento) {
+  // Confirmação antes de deletar
+  if (confirm("Tem certeza de que deseja deletar esta venda?")) {
+    // Requisição ao backend para deletar a venda
+    fetch(`http://localhost:8080/api/vendas/${codigoVenda}`, {
+      method: 'DELETE'
+    })
+    .then(response => {
+      if (response.ok) {
+        alert("Venda deletada com sucesso!");
+        // Remove a linha da tabela no frontend
+        linhaElemento.remove();
+      } else {
+        return response.text().then(err => { throw new Error(err); });
+      }
+    })
+    .catch(error => {
+      console.error("Erro ao deletar a venda:", error.message);
+      alert("Erro ao deletar a venda: " + error.message);
+    });
+  }
+}
+
 // Função para carregar e exibir vendas com o valor e frase de desconto
 function carregarVendas() {
   fetch('http://localhost:8080/api/vendas')
@@ -73,7 +97,7 @@ function carregarVendas() {
           <div class="icon-container">
             <i class="fa-regular fa-file-image" onclick="baixarComprovante('png', ${venda.codigoVenda})"></i>
             <i class="fa-solid fa-file-pdf" onclick="baixarComprovante('pdf', ${venda.codigoVenda})"></i>
-            <i class="fa-solid fa-trash" onclick="deletarVenda(${venda.codigoVenda})"></i>
+            <i class="fa-solid fa-trash" onclick="deletarVenda(${venda.codigoVenda}, this.closest('tr'))"></i>
           </div>
         `;
       });

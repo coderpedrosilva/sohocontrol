@@ -92,5 +92,13 @@ public class VendaController {
         return ResponseEntity.ok(vendasDto);
     }
 
-
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteVenda(@PathVariable Long id) {
+        return vendaRepository.findById(id)
+                .map(venda -> {
+                    vendaRepository.delete(venda);
+                    return ResponseEntity.ok().build();
+                })
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Venda não encontrada"));
+    }
 }

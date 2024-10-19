@@ -5,7 +5,6 @@
   <title>Vendas</title>
   <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
   <script src="https://kit.fontawesome.com/59c5f5e95f.js" crossorigin="anonymous"></script>
-
   <style>
     .autocomplete-suggestions {
       border: 1px solid #ddd;
@@ -16,29 +15,29 @@
       z-index: 1000;
       width: 100%;
     }
-
+  
     .autocomplete-suggestions div {
       padding: 10px;
       cursor: pointer;
     }
-
+  
     .autocomplete-suggestions div:hover {
       background-color: #f0f0f0;
     }
-
+  
     .select-container {
       display: flex;
       align-items: center;
       position: relative;
     }
-
+  
     .select-container select {
       padding-left: 25px;
       appearance: none;
       -webkit-appearance: none;
       -moz-appearance: none;
     }
-
+  
     .select-container::before {
       content: '\25BC';
       position: absolute;
@@ -46,12 +45,40 @@
       font-size: 12px;
       pointer-events: none;
     }
+  
     .autocomplete-suggestions {
-    border: none !important;
-    box-shadow: none !important;
-    margin: 0;
-    padding: 0;
-}
+      border: none !important;
+      box-shadow: none !important;
+      margin: 0;
+      padding: 0;
+    }
+  
+    .icon-container {
+      display: flex;
+      gap: 16px; /* Espaçamento aumentado entre os ícones */
+    }
+  
+    .icon-container i {
+      cursor: pointer;
+      font-size: 20px; /* Tamanho dos ícones */
+      transition: transform 0.2s; /* Efeito de clique */
+    }
+  
+    .icon-container i:hover {
+      transform: scale(1.2); /* Aumenta o tamanho ao passar o mouse */
+    }
+  
+    .fa-file-image {
+      color: #4DA6FF; /* Azul claro para o ícone de PNG */
+    }
+  
+    .fa-file-pdf {
+      color: #D9534F; /* Vermelho escuro para o ícone de PDF */
+    }
+  
+    .fa-trash {
+      color: #FF4D4D; /* Vermelho para o ícone de lixeira */
+    }
   </style>
 </head>
 <body>
