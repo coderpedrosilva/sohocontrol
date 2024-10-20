@@ -569,6 +569,11 @@ function filtrarLinhasTabela(termoBusca) {
   });
 }
 
+// Função para formatar a data de "AAAA-MM-DD" para "DD/MM/AAAA"
+function formatarData(dataISO) {
+  const partes = dataISO.split('-');
+  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
 // Função para renderizar a tabela de vendas com paginação
 function renderizarTabelaVendas() {
   let tbody = document.querySelector('#tabelaVendas tbody');
@@ -581,7 +586,7 @@ function renderizarTabelaVendas() {
   vendasPagina.forEach(venda => {
     let row = tbody.insertRow();
     row.insertCell().innerText = venda.codigoVenda;
-    row.insertCell().innerText = venda.dataVenda;
+    row.insertCell().innerText = formatarData(venda.dataVenda); // Formata a data
     row.insertCell().innerText = venda.nomeCliente;
     row.insertCell().innerText = venda.nomeProdutos;
     row.insertCell().innerText = venda.quantidades;
