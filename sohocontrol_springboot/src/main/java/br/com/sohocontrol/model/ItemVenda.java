@@ -16,6 +16,8 @@ public class ItemVenda {
 
     private int quantidade;
 
+    private double precoVenda;
+
     @ManyToOne
     @JoinColumn(name = "venda_id", nullable = false)
     @JsonBackReference // Evita referência cíclica na serialização JSON
@@ -52,6 +54,14 @@ public class ItemVenda {
 
     public void setQuantidade(int quantidade) {
         this.quantidade = quantidade;
+    }
+
+    public double getPrecoVenda() {
+        return precoVenda;
+    }
+
+    public void setPrecoVenda(double precoVenda) {
+        this.precoVenda = precoVenda;
     }
 
     public Venda getVenda() {

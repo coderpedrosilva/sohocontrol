@@ -28,28 +28,37 @@ public class VendaController {
 
     @PostMapping
     public ResponseEntity<?> createVenda(@RequestBody Venda venda) {
-        System.out.println("Recebendo requisição de venda: " + venda);
-
         if (venda.getCliente() == null || venda.getCliente().getId() == null) {
             return errorResponse("Cliente não informado ou inválido.", HttpStatus.BAD_REQUEST);
         }
 
-        venda.getItens().forEach(item -> {
-            Produto produto = produtoRepository.findById(item.getProduto().getId())
-                    .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+        try {
+            venda.getItens().forEach(item -> {
+                Produto produto = produtoRepository.findById(item.getProduto().getId())
+                        .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
-            if (produto.getQuantidade() < item.getQuantidade()) {
-                throw new RuntimeException("Quantidade insuficiente em estoque para o produto " + produto.getNome());
-            }
+                if (produto.getQuantidade() < item.getQuantidade()) {
+                    // Retornar uma resposta de erro com mensagem clara
+                    throw new IllegalArgumentException("Quantidade insuficiente em estoque para o produto " + produto.getNome());
+                }
 
-            produto.setQuantidade(produto.getQuantidade() - item.getQuantidade());
-            produtoRepository.save(produto);
-            item.setVenda(venda);
-        });
+                // Salva o preço do produto no momento da venda
+                item.setPrecoVenda(produto.getPrecoVenda());
 
-        vendaRepository.save(venda);
+                produto.setQuantidade(produto.getQuantidade() - item.getQuantidade());
+                produtoRepository.save(produto);
+                item.setVenda(venda);
+            });
 
-        return ResponseEntity.ok(venda);
+            vendaRepository.save(venda);
+            return ResponseEntity.ok(venda);
+        } catch (IllegalArgumentException e) {
+            // Captura o erro e retorna uma resposta de erro amigável
+            return errorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            // Captura outros erros
+            return errorResponse("Erro ao registrar a venda.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     private ResponseEntity<Map<String, String>> errorResponse(String message, HttpStatus status) {
@@ -64,7 +73,6 @@ public class VendaController {
             double valorFinal = venda.getValorTotal();
             String descontoInfo = "";
 
-            // Verifica se há um desconto aplicado e adiciona a informação do desconto
             if (venda.getDescontoAplicado() != null && venda.getDescontoAplicado() > 0) {
                 if ("reais".equalsIgnoreCase(venda.getTipoDesconto())) {
                     descontoInfo = String.format(" (Desconto de R$ %.2f)", venda.getDescontoAplicado());
@@ -73,7 +81,6 @@ public class VendaController {
                 }
             }
 
-            // Formata o valor total como uma string com duas casas decimais
             String valorTotalFormatado = String.format("%.2f%s", valorFinal, descontoInfo);
 
             return new VendaDTO(
@@ -82,7 +89,7 @@ public class VendaController {
                     venda.getCliente().getNome(),
                     venda.getItens().stream().map(item -> item.getProduto().getNome()).collect(Collectors.joining(", ")),
                     venda.getItens().stream().map(item -> String.valueOf(item.getQuantidade())).collect(Collectors.joining(", ")),
-                    venda.getItens().stream().map(item -> String.format("%.2f", item.getProduto().getPrecoVenda())).collect(Collectors.joining(", ")),
+                    venda.getItens().stream().map(item -> String.format("%.2f", item.getPrecoVenda())).collect(Collectors.joining(", ")),
                     valorTotalFormatado,
                     venda.getDescontoAplicado() != null ? venda.getDescontoAplicado() : 0.0,
                     venda.getTipoDesconto() != null ? venda.getTipoDesconto() : ""
@@ -91,6 +98,7 @@ public class VendaController {
 
         return ResponseEntity.ok(vendasDto);
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteVenda(@PathVariable Long id) {

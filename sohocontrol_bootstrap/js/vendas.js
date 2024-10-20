@@ -89,7 +89,6 @@ function deletarVenda(codigoVenda, linhaElemento) {
   }
 }
 
-// Função para carregar e exibir vendas com o valor e frase de desconto
 function carregarVendas() {
   fetch('http://localhost:8080/api/vendas')
     .then(response => response.json())
@@ -100,27 +99,33 @@ function carregarVendas() {
       vendas.forEach(venda => {
         const novaLinha = tabelaVendas.insertRow();
 
-        // Processa a data corretamente para evitar problema de fuso horário
-        const dataVenda = new Date(venda.dataVenda + 'T00:00:00'); // Força a data como meia-noite local
+        const dataVenda = new Date(venda.dataVenda + 'T00:00:00');
         const dia = String(dataVenda.getDate()).padStart(2, '0');
-        const mes = String(dataVenda.getMonth() + 1).padStart(2, '0'); // Mês começa do zero
+        const mes = String(dataVenda.getMonth() + 1).padStart(2, '0');
         const ano = dataVenda.getFullYear();
         const dataVendaFormatada = `${dia}/${mes}/${ano}`;
 
         novaLinha.insertCell().innerText = venda.codigoVenda;
         novaLinha.insertCell().innerText = dataVendaFormatada;
         novaLinha.insertCell().innerText = venda.nomeCliente;
-        novaLinha.insertCell().innerText = venda.nomeProdutos;
-        novaLinha.insertCell().innerText = venda.quantidades;
-        novaLinha.insertCell().innerText = venda.precosVenda;
-        novaLinha.insertCell().innerText = venda.valorTotal;
 
-        // Coluna de Ações com os ícones
+        const nomeProdutosCell = novaLinha.insertCell();
+        nomeProdutosCell.innerText = venda.nomeProdutos;
+
+        const quantidadesCell = novaLinha.insertCell();
+        quantidadesCell.innerText = venda.quantidades;
+
+        const precosVendaCell = novaLinha.insertCell();
+        precosVendaCell.innerText = venda.precosVenda; 
+
+        const valorTotalCell = novaLinha.insertCell();
+        valorTotalCell.innerText = venda.valorTotal;
+
         const acoesCell = novaLinha.insertCell();
         acoesCell.innerHTML = `
           <div class="icon-container">
-            <i class="fa-regular fa-file-image" onclick="baixarComprovante('png', ${venda.codigoVenda})"></i>
-            <i class="fa-solid fa-file-pdf" onclick="baixarComprovante('pdf', ${venda.codigoVenda})"></i>
+            <i class="fa-solid fa-file-image"></i>
+            <i class="fa-solid fa-file-pdf"></i>
             <i class="fa-solid fa-trash" onclick="deletarVenda(${venda.codigoVenda}, this.closest('tr'))"></i>
           </div>
         `;
@@ -535,7 +540,7 @@ document.getElementById('vendaForm').addEventListener('submit', function(e) {
   })
     .then(response => {
       if (!response.ok) {
-        return response.text().then(err => { throw new Error(err); });
+        return response.json().then(err => { throw new Error(err.error); });
       }
       return response.json();
     })
@@ -555,7 +560,6 @@ document.getElementById('vendaForm').addEventListener('submit', function(e) {
       carregarVendas(); // Atualiza a lista de vendas
     })
     .catch(error => {
-      console.error("Erro ao registrar a venda:", error.message);
       alert("Erro ao registrar a venda: " + error.message);
     });
 });
