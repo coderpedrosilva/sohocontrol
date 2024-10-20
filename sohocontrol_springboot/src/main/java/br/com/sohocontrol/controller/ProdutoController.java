@@ -44,7 +44,9 @@ public class ProdutoController {
             produtoExistente.setNome(produtoAtualizado.getNome());
             produtoExistente.setFornecedor(produtoAtualizado.getFornecedor());
             produtoExistente.setOrigem(produtoAtualizado.getOrigem());
+            produtoExistente.setDescricao(produtoAtualizado.getDescricao()); // Atualiza a descrição
             produtoExistente.setQuantidade(produtoAtualizado.getQuantidade());
+            produtoExistente.setPrecoCompra(produtoAtualizado.getPrecoCompra()); // Atualiza o preço de compra
             produtoExistente.setPrecoVenda(produtoAtualizado.getPrecoVenda());
 
             Produto produtoAtualizadoSalvo = produtoRepository.save(produtoExistente);

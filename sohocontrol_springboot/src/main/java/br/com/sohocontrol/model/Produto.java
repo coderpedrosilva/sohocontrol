@@ -14,54 +14,33 @@ public class Produto {
     private String nome;
     private String fornecedor;
     private String origem;
+    private String descricao;
     private int quantidade;
+    private double precoCompra;
     private double precoVenda;
 
-    public Long getId() {
-        return id;
-    }
+    // Getters e Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
 
-    public String getNome() {
-        return nome;
-    }
+    public String getFornecedor() { return fornecedor; }
+    public void setFornecedor(String fornecedor) { this.fornecedor = fornecedor; }
 
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
+    public String getOrigem() { return origem; }
+    public void setOrigem(String origem) { this.origem = origem; }
 
-    public String getFornecedor() {
-        return fornecedor;
-    }
+    public String getDescricao() { return descricao; } // Getter para descrição
+    public void setDescricao(String descricao) { this.descricao = descricao; } // Setter para descrição
 
-    public void setFornecedor(String fornecedor) {
-        this.fornecedor = fornecedor;
-    }
+    public int getQuantidade() { return quantidade; }
+    public void setQuantidade(int quantidade) { this.quantidade = quantidade; }
 
-    public String getOrigem() {
-        return origem;
-    }
+    public double getPrecoCompra() { return precoCompra; } // Getter para preço de compra
+    public void setPrecoCompra(double precoCompra) { this.precoCompra = precoCompra; } // Setter para preço de compra
 
-    public void setOrigem(String origem) {
-        this.origem = origem;
-    }
-
-    public int getQuantidade() {
-        return quantidade;
-    }
-
-    public void setQuantidade(int quantidade) {
-        this.quantidade = quantidade;
-    }
-
-    public double getPrecoVenda() {
-        return precoVenda;
-    }
-
-    public void setPrecoVenda(double precoVenda) {
-        this.precoVenda = precoVenda;
-    }
+    public double getPrecoVenda() { return precoVenda; }
+    public void setPrecoVenda(double precoVenda) { this.precoVenda = precoVenda; }
 }

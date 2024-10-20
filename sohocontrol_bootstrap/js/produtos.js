@@ -1,12 +1,35 @@
- // Função para cadastrar produto
- document.getElementById('produtoForm').addEventListener('submit', function(e) {
+// Função para carregar dados iniciais de clientes e produtos
+function carregarDadosIniciais() {
+  // Carrega clientes
+  fetch('http://localhost:8080/api/clientes')
+    .then(response => response.json())
+    .then(data => {
+      // Ordena os clientes por nome em ordem alfabética
+      clientes = data.sort((a, b) => a.nome.localeCompare(b.nome)); 
+    })
+    .catch(error => console.error('Erro ao buscar clientes:', error));
+
+  // Carrega produtos
+  fetch('http://localhost:8080/api/produtos')
+    .then(response => response.json())
+    .then(data => {
+      // Ordena os produtos por nome em ordem alfabética
+      produtos = data.sort((a, b) => a.nome.localeCompare(b.nome));
+    })
+    .catch(error => console.error('Erro ao buscar produtos:', error));
+}
+
+// Função para cadastrar produto
+document.getElementById('produtoForm').addEventListener('submit', function(e) {
   e.preventDefault();
 
   let product = {
     nome: document.getElementById('nome_produto').value,
     fornecedor: document.getElementById('fornecedor').value,
     origem: document.getElementById('origem').value,
+    descricao: document.getElementById('descricao').value, 
     quantidade: document.getElementById('quantidade').value,
+    precoCompra: document.getElementById('preco_compra').value,
     precoVenda: document.getElementById('preco_venda').value
   };
 
@@ -46,8 +69,10 @@ function atualizarTabelaProdutos() {
         row.insertCell().innerText = produto.nome;
         row.insertCell().innerText = produto.fornecedor;
         row.insertCell().innerText = produto.origem;
+        row.insertCell().innerText = produto.descricao; // Exibe a descrição do produto
         row.insertCell().innerText = produto.quantidade;
-        row.insertCell().innerText = produto.precoVenda;
+        row.insertCell().innerText = formatarPreco(produto.precoCompra); // Exibe o preço de compra formatado
+        row.insertCell().innerText = formatarPreco(produto.precoVenda);  // Exibe o preço de venda formatado
 
         // Coluna de Ações
         let actionCell = row.insertCell();
@@ -63,16 +88,28 @@ function atualizarTabelaProdutos() {
     .catch(error => console.error('Erro:', error));
 }
 
+// Função para formatar o preço com vírgula e duas casas decimais
+function formatarPreco(preco) {
+  return preco.toFixed(2).replace('.', ','); // Converte para string com duas casas decimais e troca ponto por vírgula
+}
+
 // Função para habilitar edição de produto
 function habilitarEdicaoProduto(id, editIcon) {
   let row = editIcon.closest('tr');
   let cells = row.querySelectorAll('td:not(:last-child)');
 
-  cells.forEach(cell => {
+  cells.forEach((cell, index) => {
     let input = document.createElement('input');
     input.type = 'text';
     input.className = 'form-control';
-    input.value = cell.innerText;
+    
+    // Se for uma coluna de preço, formate o valor
+    if (index === 6 || index === 7) { // Índices das colunas de preços
+      input.value = cell.innerText.replace('.', ','); // Formata o valor para exibição
+    } else {
+      input.value = cell.innerText;
+    }
+    
     cell.innerText = '';
     cell.appendChild(input);
   });
@@ -90,8 +127,10 @@ function salvarEdicaoProduto(id, saveIcon) {
     nome: cells[1].querySelector('input').value,
     fornecedor: cells[2].querySelector('input').value,
     origem: cells[3].querySelector('input').value,
-    quantidade: cells[4].querySelector('input').value,
-    precoVenda: cells[5].querySelector('input').value
+    descricao: cells[4].querySelector('input').value, // Adiciona o campo de descrição
+    quantidade: parseInt(cells[5].querySelector('input').value, 10) || 0,
+    precoCompra: parseFloat(cells[6].querySelector('input').value.replace(',', '.')) || 0, // Adiciona preço de compra
+    precoVenda: parseFloat(cells[7].querySelector('input').value.replace(',', '.')) || 0  // Adiciona preço de venda
   };
 
   fetch(`http://localhost:8080/api/produtos/${id}`, {
@@ -106,7 +145,7 @@ function salvarEdicaoProduto(id, saveIcon) {
       alert('Produto atualizado com sucesso!');
       atualizarTabelaProdutos();
     } else {
-      alert('Erro ao atualizar produto.');
+      return response.text().then(err => { throw new Error(err); });
     }
   })
   .catch(error => console.error('Erro:', error));
@@ -136,6 +175,10 @@ function deletarProduto(id) {
   }
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+  carregarDadosIniciais(); // Carrega clientes e produtos
+  atualizarTabelaProdutos(); // Recarrega a lista de produtos
+});
 
 document.getElementById('buscarProduto').addEventListener('input', atualizarTabelaProdutos);
 document.getElementById('visualizar-tab').addEventListener('click', atualizarTabelaProdutos);

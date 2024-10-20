@@ -90,6 +90,7 @@
             <select class="form-control" id="origem">
               <option>Brasil</option>
               <option>China</option>
+              <option>Outro</option>
             </select>
           </div>
           <div class="form-group">
@@ -119,7 +120,7 @@
       <div class="tab-pane fade" id="visualizar" role="tabpanel" aria-labelledby="visualizar-tab">
         <h2 class="mt-4">Visualizar Produtos</h2>
         <div class="form-group">
-          <label for="buscarProduto">Buscar por Nome:</label>
+          <label for="buscarProduto">Buscar por Produto:</label>
           <input type="text" class="form-control" id="buscarProduto" placeholder="Digite o nome do produto">
         </div>
         <table class="table table-striped" id="tabelaProdutos">
@@ -129,7 +130,9 @@
               <th>Nome</th>
               <th>Fornecedor</th>
               <th>Origem</th>
+              <th>Descrição</th>
               <th>Quantidade</th>
+              <th>Preço de Compra</th> 
               <th>Preço de Venda</th>
               <th>Ações</th>
             </tr>
