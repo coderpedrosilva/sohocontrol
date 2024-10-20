@@ -1,3 +1,7 @@
+let clientes = [];
+let clientesPorPagina = 10;
+let paginaAtual = 1;
+
 // Função para cadastrar cliente
 document.getElementById('clienteForm').addEventListener('submit', function(e) {
   e.preventDefault();
@@ -31,38 +35,110 @@ function atualizarTabelaClientes() {
   fetch('http://localhost:8080/api/clientes')
     .then(response => response.json())
     .then(data => {
-      let tbody = document.querySelector('#tabelaClientes tbody');
-      tbody.innerHTML = '';
-
-      let sortedClients = data.sort((a, b) => b.id - a.id);
-      let search = document.getElementById('buscarCliente').value.toLowerCase();
-      let filteredClients = sortedClients.filter(cliente => 
-        cliente.nome.toLowerCase().includes(search)
-      );
-
-      filteredClients.forEach(function(cliente) {
-        let row = tbody.insertRow();
-        row.setAttribute('data-id', cliente.id);
-        row.insertCell().innerText = cliente.nome;
-        row.insertCell().innerText = cliente.cpfCnpj;
-        row.insertCell().innerText = cliente.endereco;
-        row.insertCell().innerText = cliente.cidade;
-        row.insertCell().innerText = cliente.estado;
-        row.insertCell().innerText = cliente.telefone;
-        row.insertCell().innerText = cliente.email;
-
-        // Coluna de Ações
-        let actionCell = row.insertCell();
-        actionCell.innerHTML = `
-          <div class="icon-container">
-            <i class="fa-solid fa-pen-to-square" onclick="habilitarEdicaoCliente(${cliente.id}, this)"></i>
-            <i class="fa-solid fa-floppy-disk d-none" onclick="salvarEdicaoCliente(${cliente.id}, this)"></i>
-            <i class="fa-solid fa-trash" onclick="deletarCliente(${cliente.id})"></i>
-          </div>
-        `;
-      });
+      // Ordenar clientes por nome
+      clientes = data.sort((a, b) => a.nome.localeCompare(b.nome));
+      renderizarTabelaClientes();
+      renderizarPaginacao();
     })
     .catch(error => console.error('Erro:', error));
+}
+
+function renderizarTabelaClientes() {
+  let tbody = document.querySelector('#tabelaClientes tbody');
+  tbody.innerHTML = '';
+
+  let search = document.getElementById('buscarCliente').value.toLowerCase();
+  let filteredClients = clientes.filter(cliente => 
+    cliente.nome.toLowerCase().includes(search)
+  );
+
+  let inicio = (paginaAtual - 1) * clientesPorPagina;
+  let fim = inicio + clientesPorPagina;
+  let clientesPagina = filteredClients.slice(inicio, fim);
+
+  clientesPagina.forEach(cliente => {
+    let row = tbody.insertRow();
+    row.setAttribute('data-id', cliente.id);
+    row.insertCell().innerText = cliente.nome;
+    row.insertCell().innerText = cliente.cpfCnpj;
+    row.insertCell().innerText = cliente.endereco;
+    row.insertCell().innerText = cliente.cidade;
+    row.insertCell().innerText = cliente.estado;
+    row.insertCell().innerText = cliente.telefone;
+    row.insertCell().innerText = cliente.email;
+
+    // Coluna de Ações
+    let actionCell = row.insertCell();
+    actionCell.innerHTML = `
+      <div class="icon-container">
+        <i class="fa-solid fa-pen-to-square" onclick="habilitarEdicaoCliente(${cliente.id}, this)"></i>
+        <i class="fa-solid fa-floppy-disk d-none" onclick="salvarEdicaoCliente(${cliente.id}, this)"></i>
+        <i class="fa-solid fa-trash" onclick="deletarCliente(${cliente.id})"></i>
+      </div>
+    `;
+  });
+}
+
+function renderizarPaginacao() {
+  let totalPaginas = Math.ceil(clientes.length / clientesPorPagina);
+  let pagination = document.getElementById('pagination');
+  pagination.innerHTML = '';
+
+  // Define o intervalo de páginas a ser exibido
+  let maxPaginasVisiveis = 3;
+  let inicioPagina = Math.max(1, paginaAtual - 1);
+  let fimPagina = Math.min(totalPaginas, inicioPagina + maxPaginasVisiveis - 1);
+
+  // Botão "Anterior"
+  let anteriorLi = document.createElement('li');
+  anteriorLi.classList.add('page-item');
+  if (paginaAtual === 1) anteriorLi.classList.add('disabled'); // Desativa se estiver na primeira página
+  anteriorLi.innerHTML = `<a class="page-link" href="#">Anterior</a>`;
+  anteriorLi.onclick = (e) => {
+    e.preventDefault();
+    if (paginaAtual > 1) {
+      paginaAtual--;
+      renderizarTabelaClientes();
+      renderizarPaginacao();
+    }
+  };
+  pagination.appendChild(anteriorLi);
+
+  // Números das páginas
+  for (let i = inicioPagina; i <= fimPagina; i++) {
+    let li = document.createElement('li');
+    li.classList.add('page-item');
+    if (i === paginaAtual) li.classList.add('active');
+
+    let a = document.createElement('a');
+    a.classList.add('page-link');
+    a.href = '#';
+    a.innerText = i;
+    a.onclick = (e) => {
+      e.preventDefault();
+      paginaAtual = i;
+      renderizarTabelaClientes();
+      renderizarPaginacao();
+    };
+
+    li.appendChild(a);
+    pagination.appendChild(li);
+  }
+
+  // Botão "Próxima"
+  let proximaLi = document.createElement('li');
+  proximaLi.classList.add('page-item');
+  if (paginaAtual === totalPaginas) proximaLi.classList.add('disabled'); // Desativa se estiver na última página
+  proximaLi.innerHTML = `<a class="page-link" href="#">Próxima</a>`;
+  proximaLi.onclick = (e) => {
+    e.preventDefault();
+    if (paginaAtual < totalPaginas) {
+      paginaAtual++;
+      renderizarTabelaClientes();
+      renderizarPaginacao();
+    }
+  };
+  pagination.appendChild(proximaLi);
 }
 
 // Função para habilitar edição de cliente
@@ -135,6 +211,10 @@ function deletarCliente(id) {
   }
 }
 
+document.getElementById('buscarCliente').addEventListener('input', () => {
+  paginaAtual = 1; // Reseta para a primeira página ao buscar
+  renderizarTabelaClientes();
+  renderizarPaginacao();
+});
 
-document.getElementById('buscarCliente').addEventListener('input', atualizarTabelaClientes);
 document.getElementById('visualizar-tab').addEventListener('click', atualizarTabelaClientes);
