@@ -19,18 +19,52 @@ function carregarDadosIniciais() {
     .catch(error => console.error('Erro ao buscar produtos:', error));
 }
 
+// Função para formatar o preço com vírgula e duas casas decimais
+function formatarPreco(preco) {
+  return preco.toFixed(2).replace('.', ','); // Converte para string com duas casas decimais e troca ponto por vírgula
+}
+
+// Função para validar e formatar o preço durante a digitação
+function validarPreco(event) {
+  let valor = event.target.value;
+
+  // Permitir apenas números e vírgula
+  valor = valor.replace(/[^0-9,]/g, '');
+
+  // Garantir que apenas uma vírgula seja usada
+  let partes = valor.split(',');
+  if (partes.length > 2) {
+    valor = partes[0] + ',' + partes[1].substring(0, 2);
+  }
+
+  // Limitar a dois dígitos após a vírgula
+  if (partes[1]) {
+    partes[1] = partes[1].substring(0, 2);
+    valor = partes.join(',');
+  }
+
+  event.target.value = valor;
+}
+
+// Adicionar o evento de validação nos campos de preço
+document.getElementById('preco_compra').addEventListener('input', validarPreco);
+document.getElementById('preco_venda').addEventListener('input', validarPreco);
+
 // Função para cadastrar produto
 document.getElementById('produtoForm').addEventListener('submit', function(e) {
   e.preventDefault();
+
+  let precoCompra = document.getElementById('preco_compra').value.replace(',', '.');
+  let precoVenda = document.getElementById('preco_venda').value.replace(',', '.');
 
   let product = {
     nome: document.getElementById('nome_produto').value,
     fornecedor: document.getElementById('fornecedor').value,
     origem: document.getElementById('origem').value,
-    descricao: document.getElementById('descricao').value, 
-    quantidade: document.getElementById('quantidade').value,
-    precoCompra: document.getElementById('preco_compra').value,
-    precoVenda: document.getElementById('preco_venda').value
+    descricao: document.getElementById('descricao').value,
+    quantidade: parseInt(document.getElementById('quantidade').value, 10) || 0,
+    precoCompra: parseFloat(precoCompra) || 0,
+    precoVenda: parseFloat(precoVenda) || 0
   };
 
   fetch('http://localhost:8080/api/produtos', {
@@ -40,11 +74,14 @@ document.getElementById('produtoForm').addEventListener('submit', function(e) {
     },
     body: JSON.stringify(product)
   })
-  .then(response => response.json())
-  .then(data => {
-    alert('Produto cadastrado com sucesso!');
-    document.getElementById('produtoForm').reset();
-    atualizarTabelaProdutos();
+  .then(response => {
+    if (response.ok) {
+      alert('Produto cadastrado com sucesso!');
+      document.getElementById('produtoForm').reset();
+      atualizarTabelaProdutos();
+    } else {
+      return response.text().then(err => { throw new Error(err); });
+    }
   })
   .catch(error => console.error('Erro:', error));
 });
@@ -88,11 +125,6 @@ function atualizarTabelaProdutos() {
     .catch(error => console.error('Erro:', error));
 }
 
-// Função para formatar o preço com vírgula e duas casas decimais
-function formatarPreco(preco) {
-  return preco.toFixed(2).replace('.', ','); // Converte para string com duas casas decimais e troca ponto por vírgula
-}
-
 // Função para habilitar edição de produto
 function habilitarEdicaoProduto(id, editIcon) {
   let row = editIcon.closest('tr');
@@ -105,7 +137,7 @@ function habilitarEdicaoProduto(id, editIcon) {
     
     // Se for uma coluna de preço, formate o valor
     if (index === 6 || index === 7) { // Índices das colunas de preços
-      input.value = cell.innerText.replace('.', ','); // Formata o valor para exibição
+      input.value = cell.innerText.replace(',', '.'); // Formata o valor para exibição
     } else {
       input.value = cell.innerText;
     }
@@ -127,10 +159,10 @@ function salvarEdicaoProduto(id, saveIcon) {
     nome: cells[1].querySelector('input').value,
     fornecedor: cells[2].querySelector('input').value,
     origem: cells[3].querySelector('input').value,
-    descricao: cells[4].querySelector('input').value, // Adiciona o campo de descrição
+    descricao: cells[4].querySelector('input').value,
     quantidade: parseInt(cells[5].querySelector('input').value, 10) || 0,
-    precoCompra: parseFloat(cells[6].querySelector('input').value.replace(',', '.')) || 0, // Adiciona preço de compra
-    precoVenda: parseFloat(cells[7].querySelector('input').value.replace(',', '.')) || 0  // Adiciona preço de venda
+    precoCompra: parseFloat(cells[6].querySelector('input').value.replace(',', '.')) || 0,
+    precoVenda: parseFloat(cells[7].querySelector('input').value.replace(',', '.')) || 0
   };
 
   fetch(`http://localhost:8080/api/produtos/${id}`, {
@@ -153,9 +185,7 @@ function salvarEdicaoProduto(id, saveIcon) {
 
 // Função para deletar produto
 function deletarProduto(id) {
-  // Primeiro aviso sobre a exclusão dos pedidos relacionados
   if (confirm('A exclusão deste produto resultará na remoção de todos os pedidos relacionados. Deseja continuar?')) {
-    // Confirmar novamente se o usuário deseja realmente excluir o produto e os pedidos relacionados
     if (confirm('Tem certeza que deseja excluir o produto e todos os pedidos relacionados?')) {
       fetch(`http://localhost:8080/api/produtos/${id}`, {
         method: 'DELETE'
