@@ -4,6 +4,9 @@ let produtos = [];
 // Variável para armazenar as sugestões de busca
 let busca = [];
 let proximoCodigoVenda = 1000; // Inicia o código de venda em 1000
+let vendasPorPagina = 10;
+let paginaAtualVendas = 1;
+let vendas = [];
 
 // Função para carregar dados iniciais de clientes e produtos
 function carregarDadosIniciais() {
@@ -89,47 +92,13 @@ function deletarVenda(codigoVenda, linhaElemento) {
   }
 }
 
+// Função para carregar vendas do backend
 function carregarVendas() {
   fetch('http://localhost:8080/api/vendas')
     .then(response => response.json())
-    .then(vendas => {
-      const tabelaVendas = document.getElementById('tabelaVendas').querySelector('tbody');
-      tabelaVendas.innerHTML = ''; // Limpa a tabela antes de adicionar as vendas
-
-      vendas.forEach(venda => {
-        const novaLinha = tabelaVendas.insertRow();
-
-        const dataVenda = new Date(venda.dataVenda + 'T00:00:00');
-        const dia = String(dataVenda.getDate()).padStart(2, '0');
-        const mes = String(dataVenda.getMonth() + 1).padStart(2, '0');
-        const ano = dataVenda.getFullYear();
-        const dataVendaFormatada = `${dia}/${mes}/${ano}`;
-
-        novaLinha.insertCell().innerText = venda.codigoVenda;
-        novaLinha.insertCell().innerText = dataVendaFormatada;
-        novaLinha.insertCell().innerText = venda.nomeCliente;
-
-        const nomeProdutosCell = novaLinha.insertCell();
-        nomeProdutosCell.innerText = venda.nomeProdutos;
-
-        const quantidadesCell = novaLinha.insertCell();
-        quantidadesCell.innerText = venda.quantidades;
-
-        const precosVendaCell = novaLinha.insertCell();
-        precosVendaCell.innerText = venda.precosVenda; 
-
-        const valorTotalCell = novaLinha.insertCell();
-        valorTotalCell.innerText = venda.valorTotal;
-
-        const acoesCell = novaLinha.insertCell();
-        acoesCell.innerHTML = `
-          <div class="icon-container">
-            <i class="fa-solid fa-file-image"></i>
-            <i class="fa-solid fa-file-pdf"></i>
-            <i class="fa-solid fa-trash" onclick="deletarVenda(${venda.codigoVenda}, this.closest('tr'))"></i>
-          </div>
-        `;
-      });
+    .then(data => {
+      vendas = data;
+      renderizarTabelaVendas(); // Atualiza a tabela de vendas com paginação
     })
     .catch(error => console.error('Erro ao carregar vendas:', error));
 }
@@ -322,7 +291,9 @@ function atualizarValores() {
 
 // Função para calcular o valor total com desconto
 function calcularValorTotalComDesconto(valorParcial) {
-  let desconto = parseFloat(document.getElementById('desconto').value) || 0;
+  // Converte a vírgula para ponto antes do cálculo
+  let descontoStr = document.getElementById('desconto').value.replace(',', '.');
+  let desconto = parseFloat(descontoStr) || 0;
   let tipoDesconto = document.getElementById('tipo_desconto').value;
   let valorTotal = valorParcial;
 
@@ -332,16 +303,34 @@ function calcularValorTotalComDesconto(valorParcial) {
     valorTotal -= valorParcial * (desconto / 100); // Aplica desconto percentual
   }
 
-  // Se o valor total após desconto for negativo, ajuste para zero
-  valorTotal = valorTotal < 0 ? 0 : valorTotal;
+  // Ajusta o valor total para não ser negativo
+  valorTotal = Math.max(0, valorTotal);
 
-  // Exibe a frase do valor total com desconto
-  let valorTotalDisplay = valorTotal.toFixed(2);
-  if (desconto > 0) {
-    valorTotalDisplay += tipoDesconto === 'reais' ? ` (Desconto de R$ ${desconto.toFixed(2)})` : ` (Desconto de ${desconto.toFixed(0)}%)`;
-  }
-  document.getElementById('valor_total').value = valorTotalDisplay;
+  // Exibe o valor total com desconto
+  document.getElementById('valor_total').value = valorTotal.toFixed(2);
 }
+
+
+function validarDesconto(event) {
+  let valor = event.target.value;
+
+  // Permite apenas números e vírgula
+  valor = valor.replace(/[^0-9,]/g, '');
+
+  // Limita a apenas uma vírgula e duas casas decimais
+  let partes = valor.split(',');
+  if (partes.length > 2) {
+    valor = partes[0] + ',' + partes[1].substring(0, 2);
+  } else if (partes[1]) {
+    partes[1] = partes[1].substring(0, 2);
+    valor = partes.join(',');
+  }
+
+  event.target.value = valor;
+}
+
+// Adiciona o evento de validação ao campo de desconto
+document.getElementById('desconto').addEventListener('input', validarDesconto);
 
 // Função para carregar dados no autocomplete de busca (clientes e produtos)
 function carregarDadosBusca() {
@@ -580,9 +569,100 @@ function filtrarLinhasTabela(termoBusca) {
   });
 }
 
+// Função para renderizar a tabela de vendas com paginação
+function renderizarTabelaVendas() {
+  let tbody = document.querySelector('#tabelaVendas tbody');
+  tbody.innerHTML = '';
+
+  let inicio = (paginaAtualVendas - 1) * vendasPorPagina;
+  let fim = inicio + vendasPorPagina;
+  let vendasPagina = vendas.slice(inicio, fim);
+
+  vendasPagina.forEach(venda => {
+    let row = tbody.insertRow();
+    row.insertCell().innerText = venda.codigoVenda;
+    row.insertCell().innerText = venda.dataVenda;
+    row.insertCell().innerText = venda.nomeCliente;
+    row.insertCell().innerText = venda.nomeProdutos;
+    row.insertCell().innerText = venda.quantidades;
+    row.insertCell().innerText = venda.precosVenda;
+    row.insertCell().innerText = venda.valorTotal;
+
+    let actionCell = row.insertCell();
+    actionCell.innerHTML = `
+      <div class="icon-container">
+        <i class="fa-solid fa-file-image"></i>
+        <i class="fa-solid fa-file-pdf"></i>
+        <i class="fa-solid fa-trash" onclick="deletarVenda(${venda.codigoVenda}, this.closest('tr'))"></i>
+      </div>
+    `;
+  });
+  renderizarPaginacaoVendas();
+}
+
+// Função para renderizar a paginação
+function renderizarPaginacaoVendas() {
+  let totalPaginas = Math.ceil(vendas.length / vendasPorPagina);
+  let pagination = document.getElementById('paginationVendas');
+  pagination.innerHTML = '';
+
+  let maxPaginasVisiveis = 3;
+  let inicioPagina = Math.max(1, paginaAtualVendas - 1);
+  let fimPagina = Math.min(totalPaginas, inicioPagina + maxPaginasVisiveis - 1);
+
+  // Botão "Anterior"
+  let anteriorLi = document.createElement('li');
+  anteriorLi.classList.add('page-item');
+  if (paginaAtualVendas === 1) anteriorLi.classList.add('disabled');
+  anteriorLi.innerHTML = `<a class="page-link" href="#">Anterior</a>`;
+  anteriorLi.onclick = (e) => {
+    e.preventDefault();
+    if (paginaAtualVendas > 1) {
+      paginaAtualVendas--;
+      renderizarTabelaVendas();
+    }
+  };
+  pagination.appendChild(anteriorLi);
+
+  // Números das páginas
+  for (let i = inicioPagina; i <= fimPagina; i++) {
+    let li = document.createElement('li');
+    li.classList.add('page-item');
+    if (i === paginaAtualVendas) li.classList.add('active');
+
+    let a = document.createElement('a');
+    a.classList.add('page-link');
+    a.href = '#';
+    a.innerText = i;
+    a.onclick = (e) => {
+      e.preventDefault();
+      paginaAtualVendas = i;
+      renderizarTabelaVendas();
+    };
+
+    li.appendChild(a);
+    pagination.appendChild(li);
+  }
+
+  // Botão "Próxima"
+  let proximaLi = document.createElement('li');
+  proximaLi.classList.add('page-item');
+  if (paginaAtualVendas === totalPaginas) proximaLi.classList.add('disabled');
+  proximaLi.innerHTML = `<a class="page-link" href="#">Próxima</a>`;
+  proximaLi.onclick = (e) => {
+    e.preventDefault();
+    if (paginaAtualVendas < totalPaginas) {
+      paginaAtualVendas++;
+      renderizarTabelaVendas();
+    }
+  };
+  pagination.appendChild(proximaLi);
+}
+
 // Função para carregar todos os dados iniciais ao carregar a página
 document.addEventListener('DOMContentLoaded', function() {
   carregarDadosIniciais(); // Carrega clientes e produtos
   carregarVendas(); // Carrega e exibe as vendas
   carregarDadosBusca(); // Carrega dados para o autocomplete de busca
 });
+
