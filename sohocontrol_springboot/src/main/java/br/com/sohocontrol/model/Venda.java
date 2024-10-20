@@ -15,7 +15,7 @@ public class Venda {
 
     private LocalDate dataVenda;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
