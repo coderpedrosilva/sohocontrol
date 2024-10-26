@@ -1,6 +1,14 @@
+// ===================================
+// VARIÁVEIS GLOBAIS
+// ===================================
+
 let produtos = [];
 let produtosPorPagina = 10;
 let paginaAtualProdutos = 1;
+
+// ===================================
+// FUNÇÕES DE INICIALIZAÇÃO
+// ===================================
 
 // Função para carregar dados iniciais de clientes e produtos
 function carregarDadosIniciais() {
@@ -8,8 +16,7 @@ function carregarDadosIniciais() {
   fetch('http://localhost:8080/api/clientes')
     .then(response => response.json())
     .then(data => {
-      // Ordena os clientes por nome em ordem alfabética
-      clientes = data.sort((a, b) => a.nome.localeCompare(b.nome)); 
+      clientes = data.sort((a, b) => a.nome.localeCompare(b.nome)); // Ordena os clientes por nome
     })
     .catch(error => console.error('Erro ao buscar clientes:', error));
 
@@ -17,13 +24,16 @@ function carregarDadosIniciais() {
   fetch('http://localhost:8080/api/produtos')
     .then(response => response.json())
     .then(data => {
-      // Ordena os produtos por nome em ordem alfabética
-      produtos = data.sort((a, b) => a.nome.localeCompare(b.nome));
+      produtos = data.sort((a, b) => a.nome.localeCompare(b.nome)); // Ordena os produtos por nome
       renderizarTabelaProdutos();
       renderizarPaginacaoProdutos();
     })
     .catch(error => console.error('Erro ao buscar produtos:', error));
 }
+
+// ===================================
+// FUNÇÕES DE FORMATAÇÃO E VALIDAÇÃO
+// ===================================
 
 // Função para formatar o preço com vírgula e duas casas decimais
 function formatarPreco(preco) {
@@ -34,16 +44,15 @@ function formatarPreco(preco) {
 function validarPreco(event) {
   let valor = event.target.value;
 
-  // Permitir apenas números e vírgula
-  valor = valor.replace(/[^0-9,]/g, '');
+  valor = valor.replace(/[^0-9,]/g, ''); // Permite apenas números e vírgula
 
-  // Garantir que apenas uma vírgula seja usada
+  // Garante que apenas uma vírgula seja usada
   let partes = valor.split(',');
   if (partes.length > 2) {
     valor = partes[0] + ',' + partes[1].substring(0, 2);
   }
 
-  // Limitar a dois dígitos após a vírgula
+  // Limita a dois dígitos após a vírgula
   if (partes[1]) {
     partes[1] = partes[1].substring(0, 2);
     valor = partes.join(',');
@@ -55,6 +64,10 @@ function validarPreco(event) {
 // Adicionar o evento de validação nos campos de preço
 document.getElementById('preco_compra').addEventListener('input', validarPreco);
 document.getElementById('preco_venda').addEventListener('input', validarPreco);
+
+// ===================================
+// FUNÇÕES RELACIONADAS A PRODUTOS
+// ===================================
 
 // Função para cadastrar produto
 document.getElementById('produtoForm').addEventListener('submit', function(e) {
@@ -75,9 +88,7 @@ document.getElementById('produtoForm').addEventListener('submit', function(e) {
 
   fetch('http://localhost:8080/api/produtos', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(product)
   })
   .then(response => {
@@ -103,6 +114,10 @@ function atualizarTabelaProdutos() {
     })
     .catch(error => console.error('Erro:', error));
 }
+
+// ===================================
+// FUNÇÕES DE TABELA E PAGINAÇÃO
+// ===================================
 
 // Função para renderizar a tabela de produtos com paginação
 function renderizarTabelaProdutos() {
@@ -130,7 +145,6 @@ function renderizarTabelaProdutos() {
     row.insertCell().innerText = formatarPreco(produto.precoCompra);
     row.insertCell().innerText = formatarPreco(produto.precoVenda);
 
-    // Coluna de Ações
     let actionCell = row.insertCell();
     actionCell.innerHTML = `
       <div class="icon-container">
@@ -204,6 +218,10 @@ function renderizarPaginacaoProdutos() {
   pagination.appendChild(proximaLi);
 }
 
+// ===================================
+// FUNÇÕES DE EDIÇÃO E EXCLUSÃO DE PRODUTOS
+// ===================================
+
 // Função para habilitar edição de produto
 function habilitarEdicaoProduto(id, editIcon) {
   let row = editIcon.closest('tr');
@@ -213,13 +231,13 @@ function habilitarEdicaoProduto(id, editIcon) {
     let input = document.createElement('input');
     input.type = 'text';
     input.className = 'form-control';
-    
+
     if (index === 6 || index === 7) {
       input.value = cell.innerText.replace(',', '.');
     } else {
       input.value = cell.innerText;
     }
-    
+
     cell.innerText = '';
     cell.appendChild(input);
   });
@@ -244,9 +262,7 @@ function salvarEdicaoProduto(id, saveIcon) {
 
   fetch(`http://localhost:8080/api/produtos/${id}`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(productData)
   })
   .then(response => {
@@ -263,26 +279,24 @@ function salvarEdicaoProduto(id, saveIcon) {
 // Função para deletar produto
 function deletarProduto(id) {
   if (confirm('Tem certeza que deseja excluir o produto e todos os pedidos relacionados?')) {
-    fetch(`http://localhost:8080/api/produtos/${id}`, {
-      method: 'DELETE'
-    })
-    .then(response => {
-      if (response.ok) {
-        alert('Produto e todos os pedidos relacionados foram excluídos com sucesso!');
-        atualizarTabelaProdutos();
-      } else if (response.status === 404) {
-        alert('Produto não encontrado.');
-      } else {
-        alert('Erro ao excluir produto.');
-      }
-    })
-    .catch(error => console.error('Erro ao excluir produto:', error));
+    fetch(`http://localhost:8080/api/produtos/${id}`, { method: 'DELETE' })
+      .then(response => {
+        if (response.ok) {
+          alert('Produto e todos os pedidos relacionados foram excluídos com sucesso!');
+          atualizarTabelaProdutos();
+        } else if (response.status === 404) {
+          alert('Produto não encontrado.');
+        } else {
+          alert('Erro ao excluir produto.');
+        }
+      })
+      .catch(error => console.error('Erro ao excluir produto:', error));
   }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  carregarDadosIniciais();
-});
+// ===================================
+// FUNÇÕES DE BUSCA
+// ===================================
 
 document.getElementById('buscarProduto').addEventListener('input', () => {
   paginaAtualProdutos = 1;
@@ -290,4 +304,9 @@ document.getElementById('buscarProduto').addEventListener('input', () => {
   renderizarPaginacaoProdutos();
 });
 
+// ===================================
+// EVENTOS DE INICIALIZAÇÃO
+// ===================================
+
+document.addEventListener('DOMContentLoaded', carregarDadosIniciais);
 document.getElementById('visualizar-tab').addEventListener('click', atualizarTabelaProdutos);
