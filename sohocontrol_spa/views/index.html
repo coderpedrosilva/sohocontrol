@@ -2,74 +2,10 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Clientes</title>
-  <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
-  <link rel="stylesheet" href="fontawesome/css/all.min.css">
-  <style>
-    /* Ajuste para a setinha no campo de seleção do Estado */
-    .navbar-nav .nav-link.active {
-    color: #0d6efd !important; /* Azul do Bootstrap para link ativo */
-    }
-
-    .navbar-nav .nav-link {
-      color: #000 !important; /* Preto para link inativo */
-    }
-    .nav-tabs .nav-link.active {
-    color: #0d6efd !important; /* Azul do Bootstrap para aba ativa */
-    }
-
-    .nav-tabs .nav-link {
-      color: #000 !important; /* Preto para aba inativa */
-    }
-    .select-container {
-      position: relative;
-    }
-    .select-container select {
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      padding-right: 25px; /* Espaço para a setinha */
-    }
-    .select-container::after {
-      content: '\25BC'; /* Unicode para setinha */
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      pointer-events: none;
-    }
-
-    /* Estilo para o contêiner de ícones */
-    .icon-container {
-      display: flex;
-      align-items: center;
-      gap: 10px; /* Espaçamento entre os ícones */
-    }
-    .icon-container i {
-      cursor: pointer;
-      font-size: 20px;
-      transition: transform 0.2s;
-    }
-    .icon-container i:hover {
-      transform: scale(1.2);
-    }
-
-    /* Cores para os ícones */
-    .fa-pen-to-square {
-      color: #007bff; 
-    }
-    .fa-floppy-disk {
-      color: #28a745; 
-    }
-    .fa-trash {
-      color: #dc3545;
-    }
-
-    /* Ocultar ícone de salvar inicialmente */
-    .d-none {
-      display: none;
-    }
-  </style>
+  <title>Software</title>
+  <link rel="stylesheet" href="../assets/lib/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../assets/fonts/fontawesome/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/clientes.css">
 </head>
 <body>
   <!-- Navbar -->
@@ -209,7 +145,7 @@
   </div>
 
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-  <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="../js/clientes.js"></script> <!-- Incluindo o arquivo JS separado -->
+  <script src="../assets/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="../assets/js/clientes.js"></script> <!-- Incluindo o arquivo JS separado -->
 </body>
 </html>

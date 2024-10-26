@@ -8,20 +8,20 @@ app.use(express.static(__dirname));
 
 // Roteamento das URLs amigáveis
 app.get('/clientes', (req, res) => {
-  res.sendFile(path.join(__dirname, 'pages', 'index.html'));
+  res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
 app.get('/vendas', (req, res) => {
-  res.sendFile(path.join(__dirname, 'pages', 'vendas.html'));
+  res.sendFile(path.join(__dirname, 'views', 'vendas.html'));
 });
 
 app.get('/estoque', (req, res) => {
-  res.sendFile(path.join(__dirname, 'pages', 'produtos.html'));
+  res.sendFile(path.join(__dirname, 'views', 'produtos.html'));
 });
 
 // Redirecionar todas as outras rotas para a página inicial
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'pages', 'index.html'));
+  res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
 // Iniciar o servidor

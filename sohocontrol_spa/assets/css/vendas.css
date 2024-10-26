@@ -1,0 +1,87 @@
+.navbar-nav .nav-link.active {
+color: #0d6efd !important; /* Azul do Bootstrap para link ativo */
+}
+
+.navbar-nav .nav-link {
+ color: #000 !important; /* Preto para link inativo */
+}
+.nav-tabs .nav-link.active {
+color: #0d6efd !important; /* Azul do Bootstrap para aba ativa */
+}
+
+.nav-tabs .nav-link {
+ color: #000 !important; /* Preto para aba inativa */
+}
+.autocomplete-suggestions {
+ border: 1px solid #ddd;
+ max-height: 150px;
+ overflow-y: auto;
+ background-color: #fff;
+ position: absolute;
+ z-index: 1000;
+ width: auto;
+}
+
+.autocomplete-suggestions div {
+ padding: 10px;
+ cursor: pointer;
+}
+
+.autocomplete-suggestions div:hover {
+ background-color: #f0f0f0;
+}
+
+.select-container {
+ display: flex;
+ align-items: center;
+ position: relative;
+}
+
+.select-container select {
+ padding-left: 25px;
+ appearance: none;
+ -webkit-appearance: none;
+ -moz-appearance: none;
+}
+
+.select-container::before {
+ content: '\25BC';
+ position: absolute;
+ left: 10px;
+ font-size: 12px;
+ pointer-events: none;
+}
+
+.autocomplete-suggestions {
+ border: none !important;
+ box-shadow: none !important;
+ margin: 0;
+ padding: 0;
+}
+
+.icon-container {
+ display: flex;
+ gap: 16px; /* Espaçamento aumentado entre os ícones */
+}
+
+.icon-container i {
+ cursor: pointer;
+ font-size: 20px; /* Tamanho dos ícones */
+ transition: transform 0.2s; /* Efeito de clique */
+}
+
+.icon-container i:hover {
+ transform: scale(1.2); /* Aumenta o tamanho ao passar o mouse */
+}
+
+.fa-file-image {
+ color: #007bff; 
+}
+
+.fa-file-pdf {
+ color: #FF4D4D; 
+}
+
+.fa-trash {
+ color: #dc3545; 
+}
