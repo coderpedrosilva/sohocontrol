@@ -73,11 +73,14 @@ public class VendaController {
             double valorFinal = venda.getValorTotal();
             String descontoInfo = "";
 
+            // Verifica se o desconto é diferente de nulo e maior que 0
             if (venda.getDescontoAplicado() != null && venda.getDescontoAplicado() > 0) {
                 if ("reais".equalsIgnoreCase(venda.getTipoDesconto())) {
+                    // Formata para mostrar até duas casas decimais para descontos em reais
                     descontoInfo = String.format(" (Desconto de R$ %.2f)", venda.getDescontoAplicado());
                 } else if ("percentual".equalsIgnoreCase(venda.getTipoDesconto())) {
-                    descontoInfo = String.format(" (Desconto de %.0f%%)", venda.getDescontoAplicado());
+                    // Formata para mostrar até duas casas decimais para descontos percentuais
+                    descontoInfo = String.format(" (Desconto de %.2f%%)", venda.getDescontoAplicado());
                 }
             }
 
@@ -98,7 +101,6 @@ public class VendaController {
 
         return ResponseEntity.ok(vendasDto);
     }
-
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteVenda(@PathVariable Long id) {
