@@ -1,0 +1,27 @@
+# Dependências do Node.js
+node_modules/
+package-lock.json
+
+# Diretórios de build ou cache
+dist/
+build/
+.cache/
+
+# Arquivos de log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Arquivos de configuração do sistema operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos temporários do editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Arquivos temporários do sistema operacional
+*.swp
+*~
