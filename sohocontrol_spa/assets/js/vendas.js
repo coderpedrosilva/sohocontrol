@@ -76,15 +76,17 @@ function produtoJaSelecionado(produtoId) {
 document.getElementById('cliente_venda').addEventListener('click', function() {
   const suggestionsDiv = document.getElementById('cliente-suggestions');
   suggestionsDiv.innerHTML = ''; // Limpa sugestões anteriores
+  suggestionsDiv.style.display = 'block'; // Torna a lista de sugestões visível
 
   // Adiciona uma sugestão para cada cliente carregado
   clientes.forEach(cliente => {
     let suggestionItem = document.createElement('div');
+    suggestionItem.classList.add('suggestion-item');
     suggestionItem.innerText = cliente.nome;
     suggestionItem.onclick = function() {
       document.getElementById('cliente_venda').value = cliente.nome;
       document.getElementById('cliente_venda').dataset.clienteId = cliente.id; // Armazena o ID do cliente
-      suggestionsDiv.innerHTML = ''; // Limpa sugestões após a seleção
+      suggestionsDiv.style.display = 'none'; // Oculta a lista de sugestões após a seleção
     };
     suggestionsDiv.appendChild(suggestionItem);
   });
@@ -123,6 +125,17 @@ document.addEventListener('input', function(event) {
     limitarQuantidade(event.target); // Limita a quantidade máxima
     atualizarValores(); // Atualiza o valor parcial e total
   }
+});
+
+// Fecha a lista de sugestões ao clicar fora do campo de produto e da lista de sugestões
+document.addEventListener('click', function(event) {
+  const produtoInputs = document.querySelectorAll('[name="produto_venda"]');
+  produtoInputs.forEach(produtoInput => {
+    const produtoSuggestionsDiv = produtoInput.nextElementSibling;
+    if (event.target !== produtoInput && !produtoSuggestionsDiv.contains(event.target)) {
+      produtoSuggestionsDiv.innerHTML = ''; // Esconde a lista de sugestões de produto
+    }
+  });
 });
 
 // Fecha a lista de sugestões ao clicar fora do campo ou das sugestões
@@ -183,17 +196,19 @@ document.addEventListener('click', function(event) {
   if (produtoInput && produtoInput.name === 'produto_venda') {
     const suggestionsDiv = produtoInput.nextElementSibling; // Obtém a div de sugestões associada
     suggestionsDiv.innerHTML = ''; // Limpa sugestões anteriores
+    suggestionsDiv.style.display = 'block'; // Torna a lista de sugestões visível
 
-    // Adiciona sugestões para cada produto carregado
+    // Adiciona uma sugestão para cada produto carregado
     produtos.forEach(produto => {
       if (!produtoJaSelecionado(produto.id)) { // Verifica se o produto já foi selecionado
         let suggestionItem = document.createElement('div');
+        suggestionItem.classList.add('suggestion-item');
         suggestionItem.innerText = produto.nome;
         suggestionItem.onclick = function() {
           produtoInput.value = produto.nome;
           produtoInput.dataset.produtoId = produto.id; // Armazena o ID do produto
           produtoInput.dataset.preco = produto.precoVenda; // Armazena o preço do produto
-          suggestionsDiv.innerHTML = ''; // Limpa sugestões após a seleção
+          suggestionsDiv.style.display = 'none'; // Oculta a lista de sugestões após a seleção
           atualizarValores(); // Atualiza os valores parciais e total
         };
         suggestionsDiv.appendChild(suggestionItem);
@@ -202,43 +217,15 @@ document.addEventListener('click', function(event) {
   }
 });
 
-// Reexibe a lista de todos os clientes ao clicar no campo "Cliente"
-document.getElementById('cliente_venda').addEventListener('click', function() {
-  const suggestionsDiv = document.getElementById('cliente-suggestions');
-  suggestionsDiv.innerHTML = ''; // Limpa sugestões anteriores
-
-  // Adiciona uma sugestão para cada cliente carregado
-  clientes.forEach(cliente => {
-    let suggestionItem = document.createElement('div');
-    suggestionItem.innerText = cliente.nome;
-    suggestionItem.onclick = function() {
-      document.getElementById('cliente_venda').value = cliente.nome;
-      document.getElementById('cliente_venda').dataset.clienteId = cliente.id; // Armazena o ID do cliente
-      suggestionsDiv.innerHTML = ''; // Limpa sugestões após a seleção
-    };
-    suggestionsDiv.appendChild(suggestionItem);
-  });
-});
-
-// Fecha as listas de sugestões ao clicar fora do campo de entrada ou das sugestões,
-// tanto para o campo de cliente quanto para o campo de produto.
+// Fecha a lista de sugestões ao clicar fora do campo de cliente ou da lista de sugestões
 document.addEventListener('click', function(event) {
   const clienteInput = document.getElementById('cliente_venda');
   const clienteSuggestionsDiv = document.getElementById('cliente-suggestions');
-  const produtoInputs = document.querySelectorAll('[name="produto_venda"]');
 
-  // Verifica se o clique foi fora do campo de cliente e da lista de sugestões de cliente
+  // Verifica se o clique foi fora do campo de cliente e da lista de sugestões
   if (event.target !== clienteInput && !clienteSuggestionsDiv.contains(event.target)) {
-    clienteSuggestionsDiv.innerHTML = ''; // Esconde a lista de sugestões de cliente
+    clienteSuggestionsDiv.style.display = 'none'; // Esconde a lista de sugestões
   }
-
-  // Verifica se o clique foi fora do campo de produto e da lista de sugestões de produto
-  produtoInputs.forEach(produtoInput => {
-    const produtoSuggestionsDiv = produtoInput.nextElementSibling;
-    if (event.target !== produtoInput && !produtoSuggestionsDiv.contains(event.target)) {
-      produtoSuggestionsDiv.innerHTML = ''; // Esconde a lista de sugestões de produto
-    }
-  });
 });
 
 // Carrega sugestões de clientes e produtos no campo de busca geral
@@ -642,15 +629,24 @@ function filtrarLinhasTabela(termoBusca) {
   });
 }
 
+// Função para renderizar a tabela de vendas considerando a busca
 function renderizarTabelaVendas() {
   let tbody = document.querySelector('#tabelaVendas tbody');
   tbody.innerHTML = ''; // Limpa a tabela antes de adicionar novas linhas
 
+  let termoBusca = document.getElementById('buscarVenda').value.toLowerCase();
+  let vendasFiltradas = vendas.filter(venda => 
+    venda.nomeCliente.toLowerCase().includes(termoBusca) || 
+    venda.nomeProdutos.toLowerCase().includes(termoBusca)
+  );
+
   let inicio = (paginaAtualVendas - 1) * vendasPorPagina;
   let fim = inicio + vendasPorPagina;
-  let vendasPagina = vendas.slice(inicio, fim);
 
-  vendasPagina.forEach(venda => {
+  // Caso esteja buscando, exibir todos os resultados filtrados, ignorando a paginação
+  let vendasExibidas = termoBusca ? vendasFiltradas : vendas.slice(inicio, fim);
+
+  vendasExibidas.forEach(venda => {
     let row = tbody.insertRow();
     row.insertCell().innerText = venda.codigoVenda;
     row.insertCell().innerText = formatarData(venda.dataVenda);
@@ -678,8 +674,17 @@ function renderizarTabelaVendas() {
     `;
   });
 
-  renderizarPaginacaoVendas();
+  // Renderizar paginação apenas se não houver busca ativa
+  if (!termoBusca) {
+    renderizarPaginacaoVendas();
+  }
 }
+
+// Função de busca ajustada para permitir busca global
+document.getElementById('buscarVenda').addEventListener('input', function() {
+  paginaAtualVendas = 1; // Reinicia para a primeira página
+  renderizarTabelaVendas(); // Atualiza a tabela com os resultados da busca
+});
 
 // Renderiza os botões de paginação da tabela de vendas
 function renderizarPaginacaoVendas() {
