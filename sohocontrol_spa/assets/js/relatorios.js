@@ -187,15 +187,25 @@ function distribuirVariações(total) {
 function renderSparkline(title, data, selector) {
   const totalValue = data.reduce((a, b) => a + b, 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
+  let color = '#008FFB'; // Azul padrão
+
+  // Define a cor como cinza translúcido para "Total de Vendas" e "Total de Descontos"
+  if (title === 'Total de Vendas' || title === 'Total de Descontos') {
+    color = 'rgba(160, 160, 160, 0.5)'; // Cinza com 50% de opacidade
+  }
+
   const options = {
     chart: {
       type: 'area',
       height: 160,
       sparkline: { enabled: true }
     },
-    stroke: { curve: 'smooth' },
+    stroke: { 
+      curve: 'straight', // Altera para uma curva reta, criando um efeito mais pontudo
+      width: 5
+    },
     series: [{ name: title, data: data }],
-    colors: ['#008FFB'],
+    colors: [color], // Aplica a cor correspondente com opacidade
     title: {
       text: totalValue, // Exibe o valor total na parte superior
       offsetX: 30,
@@ -205,6 +215,13 @@ function renderSparkline(title, data, selector) {
       text: title, // Exibe o título na parte inferior
       offsetX: 30,
       style: { fontSize: '14px' }
+    },
+    tooltip: {
+      y: {
+        formatter: function(value) {
+          return value.toFixed(2); // Limita a duas casas decimais
+        }
+      }
     }
   };
   new ApexCharts(document.querySelector(selector), options).render();
