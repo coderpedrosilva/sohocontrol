@@ -630,6 +630,7 @@ function filtrarLinhasTabela(termoBusca) {
 }
 
 // Função para renderizar a tabela de vendas considerando a busca
+// Função para renderizar a tabela de vendas considerando a busca
 function renderizarTabelaVendas() {
   let tbody = document.querySelector('#tabelaVendas tbody');
   tbody.innerHTML = ''; // Limpa a tabela antes de adicionar novas linhas
@@ -643,7 +644,6 @@ function renderizarTabelaVendas() {
   let inicio = (paginaAtualVendas - 1) * vendasPorPagina;
   let fim = inicio + vendasPorPagina;
 
-  // Caso esteja buscando, exibir todos os resultados filtrados, ignorando a paginação
   let vendasExibidas = termoBusca ? vendasFiltradas : vendas.slice(inicio, fim);
 
   vendasExibidas.forEach(venda => {
@@ -654,14 +654,8 @@ function renderizarTabelaVendas() {
     row.insertCell().innerText = venda.nomeProdutos;
     row.insertCell().innerText = venda.quantidades;
     row.insertCell().innerText = venda.precosVenda;
-
-    // Verifica se a frase de desconto está presente no valor total
-    let valorTotalCell = row.insertCell();
-    if (venda.valorTotal.includes('Desconto')) {
-      valorTotalCell.innerText = venda.valorTotal; // Exibe o valor total já formatado do backend
-    } else {
-      valorTotalCell.innerText = parseFloat(venda.valorTotal).toFixed(2).replace('.', ','); // Sem desconto
-    }
+    row.insertCell().innerText = venda.valorParcial; 
+    row.insertCell().innerText = venda.valorTotal; // Coluna única para "Valor Total da Venda"
 
     // Adiciona as ações (ícones) para cada venda
     let actionCell = row.insertCell();

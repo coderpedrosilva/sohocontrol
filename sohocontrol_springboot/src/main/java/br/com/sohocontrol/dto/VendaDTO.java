@@ -3,24 +3,28 @@ package br.com.sohocontrol.dto;
 import java.time.LocalDate;
 
 public class VendaDTO {
+
     private Long codigoVenda;
     private LocalDate dataVenda;
     private String nomeCliente;
     private String nomeProdutos;
     private String quantidades;
     private String precosVenda;
-    private String valorTotal; // Alterado para String para permitir a frase de desconto
+    private String valorParcial; // Novo campo
+    private String valorTotal;
     private double descontoAplicado;
     private String tipoDesconto;
 
-    // Construtor completo incluindo os novos campos de desconto
-    public VendaDTO(Long codigoVenda, LocalDate dataVenda, String nomeCliente, String nomeProdutos, String quantidades, String precosVenda, String valorTotal, double descontoAplicado, String tipoDesconto) {
+    // Construtor atualizado
+    public VendaDTO(Long codigoVenda, LocalDate dataVenda, String nomeCliente, String nomeProdutos, String quantidades,
+                    String precosVenda, String valorParcial, String valorTotal, double descontoAplicado, String tipoDesconto) {
         this.codigoVenda = codigoVenda;
         this.dataVenda = dataVenda;
         this.nomeCliente = nomeCliente;
         this.nomeProdutos = nomeProdutos;
         this.quantidades = quantidades;
         this.precosVenda = precosVenda;
+        this.valorParcial = valorParcial;
         this.valorTotal = valorTotal;
         this.descontoAplicado = descontoAplicado;
         this.tipoDesconto = tipoDesconto;
@@ -73,6 +77,14 @@ public class VendaDTO {
 
     public void setPrecosVenda(String precosVenda) {
         this.precosVenda = precosVenda;
+    }
+
+    public String getValorParcial() {
+        return valorParcial;
+    }
+
+    public void setValorParcial(String valorParcial) {
+        this.valorParcial = valorParcial;
     }
 
     public String getValorTotal() {

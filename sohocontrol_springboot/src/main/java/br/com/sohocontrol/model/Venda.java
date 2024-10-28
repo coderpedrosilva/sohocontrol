@@ -20,17 +20,17 @@ public class Venda {
     private Cliente cliente;
 
     @OneToMany(mappedBy = "venda", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference // Evita referência cíclica na serialização JSON
+    @JsonManagedReference
     private List<ItemVenda> itens;
 
     private double valorTotal;
+    private Double descontoAplicado;
+    private String tipoDesconto;
 
-    private Double descontoAplicado; // Alterado para Double
-    private String tipoDesconto; // Tipo de desconto (reais ou percentual)
+    // Novo campo para valor parcial
+    private double valorParcial;
 
-    // Construtores, Getters e Setters
-    public Venda() {}
-
+    // Getters e Setters
     public Long getId() {
         return id;
     }
@@ -85,5 +85,13 @@ public class Venda {
 
     public void setTipoDesconto(String tipoDesconto) {
         this.tipoDesconto = tipoDesconto;
+    }
+
+    public double getValorParcial() {
+        return valorParcial;
+    }
+
+    public void setValorParcial(double valorParcial) {
+        this.valorParcial = valorParcial;
     }
 }
