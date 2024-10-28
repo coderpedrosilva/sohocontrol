@@ -114,6 +114,7 @@ function processarDadosVendas(vendas, startDate, endDate) {
 }
 
 // Função para renderizar os gráficos com os dados obtidos
+// Função para renderizar os gráficos com os dados obtidos
 function renderizarGraficos(totalVendas, totalDescontos, totalLucro, vendasPorMes, produtosNomes, produtosQuantidade, clientesNomes, clientesQuantidade) {
   const vendasVariacoes = distribuirVariações(totalVendas);
   const descontosVariacoes = distribuirVariações(totalDescontos);
@@ -128,7 +129,25 @@ function renderizarGraficos(totalVendas, totalDescontos, totalLucro, vendasPorMe
 
   renderDonutChart('Produtos Mais Vendidos', produtosQuantidade, produtosNomes, '#donut');
   renderAreaChart('Clientes que Mais Compraram', clientesQuantidade, clientesNomes, '#area');
-  renderLineChart('Estoque dos Produtos Mais Vendidos', produtosQuantidade, produtosNomes, '#line');
+
+  // Faz uma requisição para buscar o estoque total dos produtos mais vendidos
+  fetch('http://localhost:8080/api/produtos')
+    .then(response => response.json())
+    .then(data => {
+      // Filtra o estoque dos 10 produtos mais vendidos
+      const estoqueProdutosMaisVendidos = data
+        .filter(produto => produtosNomes.includes(produto.nome))
+        .map(produto => ({ nome: produto.nome, quantidade: produto.quantidade }));
+
+      // Atualiza o gráfico de linhas com o estoque total dos produtos mais vendidos
+      renderLineChart(
+        'Estoque dos Produtos Mais Vendidos',
+        estoqueProdutosMaisVendidos.map(p => p.quantidade),
+        estoqueProdutosMaisVendidos.map(p => p.nome),
+        '#line'
+      );
+    })
+    .catch(error => console.error('Erro ao buscar estoque dos produtos mais vendidos:', error));
 }
 
 // Função para criar o gráfico de barras com correspondência correta dos meses
