@@ -80,7 +80,8 @@ function processarDadosVendas(vendas, startDate, endDate) {
     totalDescontos += descontoEmReais;
     totalLucro += valorVenda;
 
-    const mes = new Date(venda.dataVenda).getMonth();
+    // Ajusta para garantir que o mês esteja correto
+    const mes = new Date(venda.dataVenda).getUTCMonth(); // Obtém o mês da venda (0-11)
     vendasPorMes[mes] += valorVenda;
 
     const produtos = venda.nomeProdutos.split(', ');
@@ -121,18 +122,30 @@ function renderizarGraficos(totalVendas, totalDescontos, totalLucro, vendasPorMe
   renderSparkline('Total de Vendas', vendasVariacoes, '#totalSales');
   renderSparkline('Total de Descontos', descontosVariacoes, '#spark1');
   renderSparkline('Lucro', lucroVariacoes, '#spark2');
+
+  // Ajusta o gráfico de "Vendas por Mês" para corresponder corretamente aos meses
   renderBarChart('Vendas por Mês', vendasPorMes, '#bar');
 
-  // Ajusta para mostrar apenas os 10 produtos mais vendidos no gráfico de rosca
-  renderDonutChart(
-    'Produtos Mais Vendidos',
-    produtosQuantidade,
-    produtosNomes,
-    '#donut'
-  );
-
+  renderDonutChart('Produtos Mais Vendidos', produtosQuantidade, produtosNomes, '#donut');
   renderAreaChart('Clientes que Mais Compraram', clientesQuantidade, clientesNomes, '#area');
-  renderLineChart('Estoque Atual dos 10 Produtos Mais Vendidos', produtosQuantidade, produtosNomes, '#line');
+  renderLineChart('Estoque dos Produtos Mais Vendidos', produtosQuantidade, produtosNomes, '#line');
+}
+
+// Função para criar o gráfico de barras com correspondência correta dos meses
+function renderBarChart(title, data, selector) {
+  const options = {
+    chart: { type: 'bar', height: 380, stacked: true },
+    series: [{ name: title, data: data }],
+    xaxis: {
+      categories: [
+        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 
+        'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 
+        'Novembro', 'Dezembro'
+      ] // Define os meses como categorias
+    },
+    title: { text: title, align: 'left', style: { fontSize: '18px' } }
+  };
+  new ApexCharts(document.querySelector(selector), options).render();
 }
 
 // Função para distribuir o valor total em variações
@@ -151,7 +164,7 @@ function distribuirVariações(total) {
   return variacoes;
 }
 
-// Funções para criar os gráficos
+// Funções para criar os gráficos restantes (inalterados)
 function renderSparkline(title, data, selector) {
   const options = {
     chart: {
@@ -180,19 +193,9 @@ function renderDonutChart(title, data, labels, selector) {
   const options = {
     chart: { type: 'donut', width: '100%', height: 400 },
     series: data,
-    labels: labels, // Usa os nomes reais dos produtos como rótulos
+    labels: labels,
     title: { text: title, align: 'center', style: { fontSize: '18px' } },
     legend: { position: 'bottom' }
-  };
-  new ApexCharts(document.querySelector(selector), options).render();
-}
-
-function renderBarChart(title, data, selector) {
-  const options = {
-    chart: { type: 'bar', height: 380, stacked: true },
-    series: [{ name: title, data: data }],
-    xaxis: { categories: Array.from({ length: data.length }, (_, i) => i + 1) },
-    title: { text: title, align: 'left', style: { fontSize: '18px' } }
   };
   new ApexCharts(document.querySelector(selector), options).render();
 }
