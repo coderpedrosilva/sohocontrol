@@ -1,3 +1,20 @@
 .box { border: 1px solid #ccc; padding: 10px; min-height: 200px; margin-top: 20px; }
 .chart-title { font-weight: bold; margin-bottom: 5px; text-align: center; }
 .filter-section { margin: 20px 0; }
+
+/* Ajuste para a setinha no campo de seleção do Estado */
+.navbar-nav .nav-link.active {
+color: #0d6efd !important; /* Azul do Bootstrap para link ativo */
+}
+    
+.navbar-nav .nav-link {
+    color: #000 !important; /* Preto para link inativo */
+}
+
+.nav-tabs .nav-link.active {
+color: #0d6efd !important; /* Azul do Bootstrap para aba ativa */
+}
+
+.nav-tabs .nav-link {
+    color: #000 !important; /* Preto para aba inativa */
+}
