@@ -18,13 +18,12 @@ document.getElementById('applyFilter').addEventListener('click', function() {
 // Função para obter o último dia de um mês
 function obterUltimoDiaDoMes(mesAno) {
   const [ano, mes] = mesAno.split('-');
-  const ultimoDia = new Date(ano, mes, 0).getDate(); // Calcula o último dia do mês
+  const ultimoDia = new Date(ano, mes, 0).getDate();
   return `${mesAno}-${ultimoDia}`;
 }
 
 // Função para atualizar os gráficos com base nos dados do backend
 function atualizarGraficos(startDate, endDate) {
-  // Limpa os gráficos antes de atualizá-los
   limparGraficos();
 
   fetch(`http://localhost:8080/api/vendas/filtrar?start=${startDate}&end=${endDate}`, {
@@ -37,7 +36,7 @@ function atualizarGraficos(startDate, endDate) {
     return response.json();
   })
   .then(data => {
-    processarDadosVendas(data);
+    processarDadosVendas(data, startDate, endDate);
   })
   .catch(error => {
     console.error('Erro ao buscar dados:', error);
@@ -57,8 +56,7 @@ function limparGraficos() {
 }
 
 // Função para processar dados das vendas e atualizar os gráficos
-function processarDadosVendas(vendas) {
-  // Inicializa as variáveis
+function processarDadosVendas(vendas, startDate, endDate) {
   let totalVendas = 0;
   let totalDescontos = 0;
   let totalLucro = 0;
@@ -71,7 +69,6 @@ function processarDadosVendas(vendas) {
     const valorVenda = parseFloat(venda.valorTotal || 0);
     let descontoEmReais = 0;
 
-    // Converte desconto percentual para reais corretamente
     if (venda.tipoDesconto === 'percentual') {
       const valorOriginal = valorVenda / (1 - venda.descontoAplicado / 100);
       descontoEmReais = parseFloat((valorOriginal * (venda.descontoAplicado / 100)).toFixed(2));
@@ -79,68 +76,84 @@ function processarDadosVendas(vendas) {
       descontoEmReais = parseFloat(venda.descontoAplicado || 0);
     }
 
-    // Incrementa os totais
     totalVendas += valorVenda + descontoEmReais;
     totalDescontos += descontoEmReais;
     totalLucro += valorVenda;
 
-    // Adiciona o valor de vendas ao mês correto
     const mes = new Date(venda.dataVenda).getMonth();
     vendasPorMes[mes] += valorVenda;
 
-    // Contabiliza os produtos vendidos
     const produtos = venda.nomeProdutos.split(', ');
     produtos.forEach(produto => {
       produtosVendidos[produto] = (produtosVendidos[produto] || 0) + 1;
     });
 
-    // Contabiliza os clientes que mais compraram
     const cliente = venda.nomeCliente;
     clientesCompraram[cliente] = (clientesCompraram[cliente] || 0) + 1;
   });
 
-  // Organiza os 10 produtos mais vendidos e os 10 clientes que mais compraram
-  const produtosMaisVendidos = Object.entries(produtosVendidos)
+  // Organiza os 10 produtos mais vendidos
+  const topProdutos = Object.entries(produtosVendidos)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 10)
-    .map(item => item[1]);
+    .map(item => item[0]);
 
-  const clientesMaisCompraram = Object.entries(clientesCompraram)
+  // Organiza os 10 clientes que mais compraram
+  const topClientes = Object.entries(clientesCompraram)
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 10)
-    .map(item => item[1]);
+    .slice(0, 10);
 
-  // Gera variações mantendo o valor total calculado
+  const clientesNomes = topClientes.map(item => item[0]);
+  const clientesQuantidade = topClientes.map(item => item[1]);
+
+  // Faz a requisição para obter o estoque dos produtos mais vendidos
+  buscarEstoqueProdutos(topProdutos, startDate, endDate, (estoqueProdutos) => {
+    renderizarGraficos(totalVendas, totalDescontos, totalLucro, vendasPorMes, estoqueProdutos, clientesNomes, clientesQuantidade);
+  });
+}
+
+// Função para buscar o estoque dos produtos mais vendidos
+function buscarEstoqueProdutos(produtos, startDate, endDate, callback) {
+  fetch('http://localhost:8080/api/produtos')
+    .then(response => response.json())
+    .then(data => {
+      const estoqueProdutos = data
+        .filter(produto => produtos.includes(produto.nome))
+        .map(produto => ({ nome: produto.nome, quantidade: produto.quantidade }));
+
+      callback(estoqueProdutos);
+    })
+    .catch(error => console.error('Erro ao buscar estoque de produtos:', error));
+}
+
+// Função para renderizar os gráficos com os dados obtidos
+function renderizarGraficos(totalVendas, totalDescontos, totalLucro, vendasPorMes, estoqueProdutos, clientesNomes, clientesQuantidade) {
   const vendasVariacoes = distribuirVariações(totalVendas);
   const descontosVariacoes = distribuirVariações(totalDescontos);
   const lucroVariacoes = distribuirVariações(totalLucro);
 
-  // Atualiza os gráficos com os resultados corrigidos
   renderSparkline('Total de Vendas', vendasVariacoes, '#totalSales');
   renderSparkline('Total de Descontos', descontosVariacoes, '#spark1');
   renderSparkline('Lucro', lucroVariacoes, '#spark2');
   renderBarChart('Vendas por Mês', vendasPorMes, '#bar');
-  renderDonutChart('Produtos Mais Vendidos', produtosMaisVendidos, '#donut');
-  renderAreaChart('Clientes que Mais Compraram', clientesMaisCompraram, '#area');
+  renderDonutChart('Produtos Mais Vendidos', estoqueProdutos.map(p => p.quantidade), '#donut');
+  renderAreaChart('Clientes que Mais Compraram', clientesQuantidade, clientesNomes, '#area');
+  renderLineChart('Estoque Atual dos 10 Produtos Mais Vendidos', estoqueProdutos.map(p => p.quantidade), estoqueProdutos.map(p => p.nome), '#line');
 }
 
-// TRABALHAR ESSA FUNÇÃO COM ATENÇÃO DEPOIS
 // Função para distribuir o valor total em variações
 function distribuirVariações(total) {
-  const pontos = 24; // Número de pontos para variação
+  const pontos = 24;
   const variacoes = Array(pontos).fill(0);
   let soma = 0;
 
   for (let i = 0; i < pontos - 1; i++) {
-    // Gera uma variação aleatória, mantendo o total exato
-    const variacao = Math.random() * (total - soma) * 0.1; // Até 10% do restante
+    const variacao = Math.random() * (total - soma) * 0.1;
     variacoes[i] = variacao;
     soma += variacao;
   }
 
-  // Ajusta o último ponto para garantir que a soma seja igual ao total
   variacoes[pontos - 1] = total - soma;
-
   return variacoes;
 }
 
@@ -152,9 +165,9 @@ function renderSparkline(title, data, selector) {
       height: 160,
       sparkline: { enabled: true }
     },
-    stroke: { curve: 'smooth' }, // Define a linha suave
+    stroke: { curve: 'smooth' },
     series: [{ name: title, data: data }],
-    colors: ['#008FFB'], // Define uma cor fixa para melhorar a visualização
+    colors: ['#008FFB'],
     title: {
       text: title,
       offsetX: 30,
@@ -183,18 +196,28 @@ function renderDonutChart(title, data, selector) {
   const options = {
     chart: { type: 'donut', width: '100%', height: 400 },
     series: data,
-    labels: Object.keys(data),
+    labels: data.map((_, index) => `Produto ${index + 1}`),
     title: { text: title, align: 'center', style: { fontSize: '18px' } },
     legend: { position: 'bottom' }
   };
   new ApexCharts(document.querySelector(selector), options).render();
 }
 
-function renderAreaChart(title, data, selector) {
+function renderAreaChart(title, data, categories, selector) {
   const options = {
     chart: { type: 'area', height: 340 },
     series: [{ name: title, data: data }],
-    xaxis: { categories: Array.from({ length: data.length }, (_, i) => i + 1) },
+    xaxis: { categories: categories },
+    title: { text: title, align: 'left', style: { fontSize: '18px' } }
+  };
+  new ApexCharts(document.querySelector(selector), options).render();
+}
+
+function renderLineChart(title, data, categories, selector) {
+  const options = {
+    chart: { type: 'line', height: 340 },
+    series: [{ name: title, data: data }],
+    xaxis: { categories: categories },
     title: { text: title, align: 'left', style: { fontSize: '18px' } }
   };
   new ApexCharts(document.querySelector(selector), options).render();
