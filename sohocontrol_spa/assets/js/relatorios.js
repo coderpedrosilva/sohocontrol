@@ -183,8 +183,10 @@ function distribuirVariações(total) {
   return variacoes;
 }
 
-// Funções para criar os gráficos restantes (inalterados)
+// Função para criar gráficos sparkline com o valor acima e o título abaixo
 function renderSparkline(title, data, selector) {
+  const totalValue = data.reduce((a, b) => a + b, 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
   const options = {
     chart: {
       type: 'area',
@@ -195,12 +197,12 @@ function renderSparkline(title, data, selector) {
     series: [{ name: title, data: data }],
     colors: ['#008FFB'],
     title: {
-      text: title,
+      text: totalValue, // Exibe o valor total na parte superior
       offsetX: 30,
       style: { fontSize: '24px' }
     },
     subtitle: {
-      text: data.reduce((a, b) => a + b, 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+      text: title, // Exibe o título na parte inferior
       offsetX: 30,
       style: { fontSize: '14px' }
     }
