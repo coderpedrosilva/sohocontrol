@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SOHO Control - Dashboard</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/relatorios.css">
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">SOHO Control</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="/clientes">Clientes</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/vendas">Vendas</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/estoque">Estoque</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="/relatorios">Relatórios</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Filtro de Período -->
+  <div class="container filter-section">
+    <div class="row">
+      <div class="col-md-3">
+        <label for="startMonth">Mês/Ano Inicial:</label>
+        <input type="month" id="startMonth" class="form-control">
+      </div>
+      <div class="col-md-3">
+        <label for="endMonth">Mês/Ano Final:</label>
+        <input type="month" id="endMonth" class="form-control">
+      </div>
+      <div class="col-md-2">
+        <button id="applyFilter" class="btn btn-primary mt-4">Aplicar Filtro</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráficos -->
+  <div class="container">
+    <div class="row sparkboxes mt-4 mb-4">
+      <div class="col-md-4">
+        <div class="box">
+          <div id="totalSales"></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="box">
+          <div id="spark1"></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="box">
+          <div id="spark2"></div>
+        </div>
+      </div>
+    </div>
+    <div class="row mt-5 mb-4">
+      <div class="col-md-6">
+        <div class="box">
+          <div id="bar"></div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="box">
+          <div id="donut"></div>
+        </div>
+      </div>
+    </div>
+    <div class="row mt-4 mb-4">
+      <div class="col-md-6">
+        <div class="box">
+          <div id="area"></div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="box">
+          <div id="line"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Configuração inicial para ApexCharts
+    Apex.grid = { padding: { right: 0, left: 0 } };
+    Apex.dataLabels = { enabled: false };
+
+    // Função para aplicar o filtro de período
+    document.getElementById('applyFilter').addEventListener('click', function() {
+      const startMonth = document.getElementById('startMonth').value;
+      const endMonth = document.getElementById('endMonth').value;
+      if (startMonth && endMonth) {
+        const startDate = `${startMonth}-01`;
+        const endDate = obterUltimoDiaDoMes(endMonth);
+        atualizarGraficos(startDate, endDate);
+      } else {
+        alert('Por favor, selecione o período inicial e final.');
+      }
+    });
+
+    // Função para obter o último dia de um mês
+    function obterUltimoDiaDoMes(mesAno) {
+      const [ano, mes] = mesAno.split('-');
+      const ultimoDia = new Date(ano, mes, 0).getDate(); // Calcula o último dia do mês
+      return `${mesAno}-${ultimoDia}`;
+    }
+
+    // Função para atualizar os gráficos com base nos dados do backend
+    function atualizarGraficos(startDate, endDate) {
+      // Limpa os gráficos antes de atualizá-los
+      limparGraficos();
+
+      fetch(`http://localhost:8080/api/vendas/filtrar?start=${startDate}&end=${endDate}`, {
+        headers: { 'Accept': 'application/json' }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Erro: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        processarDadosVendas(data);
+      })
+      .catch(error => {
+        console.error('Erro ao buscar dados:', error);
+        alert('Erro ao buscar dados. Verifique a API ou o console para mais detalhes.');
+      });
+    }
+
+    // Função para limpar gráficos antes de renderizar novos
+    function limparGraficos() {
+      document.getElementById('totalSales').innerHTML = '';
+      document.getElementById('spark1').innerHTML = '';
+      document.getElementById('spark2').innerHTML = '';
+      document.getElementById('bar').innerHTML = '';
+      document.getElementById('donut').innerHTML = '';
+      document.getElementById('area').innerHTML = '';
+      document.getElementById('line').innerHTML = '';
+    }
+
+    // Função para processar dados das vendas e atualizar os gráficos
+    function processarDadosVendas(vendas) {
+      // Inicializa as variáveis
+      let totalVendas = 0;
+      let totalDescontos = 0;
+      let totalLucro = 0;
+      let vendasPorMes = Array(12).fill(0);
+      let produtosVendidos = {};
+      let clientesCompraram = {};
+
+      // Calcula os totais de vendas, descontos e lucro
+      vendas.forEach(venda => {
+        const valorVenda = parseFloat(venda.valorTotal || 0);
+        let descontoEmReais = 0;
+
+        // Converte desconto percentual para reais corretamente
+        if (venda.tipoDesconto === 'percentual') {
+          // Calcula o valor original
+          const valorOriginal = valorVenda / (1 - venda.descontoAplicado / 100);
+          // Calcula o valor do desconto
+          descontoEmReais = parseFloat((valorOriginal * (venda.descontoAplicado / 100)).toFixed(2));
+        } else {
+          // Se o desconto é em reais, usa diretamente o valor de desconto
+          descontoEmReais = parseFloat(venda.descontoAplicado || 0);
+        }
+
+        // Incrementa os totais
+        totalVendas += valorVenda + descontoEmReais;
+        totalDescontos += descontoEmReais;
+        totalLucro += valorVenda;
+
+        // Adiciona o valor de vendas ao mês correto
+        const mes = new Date(venda.dataVenda).getMonth();
+        vendasPorMes[mes] += valorVenda;
+
+        // Contabiliza os produtos vendidos
+        const produtos = venda.nomeProdutos.split(', ');
+        produtos.forEach(produto => {
+          produtosVendidos[produto] = (produtosVendidos[produto] || 0) + 1;
+        });
+
+        // Contabiliza os clientes que mais compraram
+        const cliente = venda.nomeCliente;
+        clientesCompraram[cliente] = (clientesCompraram[cliente] || 0) + 1;
+      });
+
+      // Organiza os 10 produtos mais vendidos e os 10 clientes que mais compraram
+      const produtosMaisVendidos = Object.entries(produtosVendidos)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(item => item[1]);
+
+      const clientesMaisCompraram = Object.entries(clientesCompraram)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(item => item[1]);
+
+      // Atualiza os gráficos com os resultados corrigidos
+      renderSparkline('Total de Vendas', totalVendas, '#totalSales');
+      renderSparkline('Total de Descontos', totalDescontos, '#spark1');
+      renderSparkline('Lucro', totalLucro, '#spark2');
+      renderBarChart('Vendas por Mês', vendasPorMes, '#bar');
+      renderDonutChart('Produtos Mais Vendidos', produtosMaisVendidos, '#donut');
+      renderAreaChart('Clientes que Mais Compraram', clientesMaisCompraram, '#area');
+    }
+
+    // Funções para criar os gráficos
+    function renderSparkline(title, data, selector) {
+      const options = {
+        chart: {
+          type: 'area',
+          height: 160,
+          sparkline: { enabled: true }
+        },
+        series: [{ name: title, data: [data] }],
+        title: {
+          text: title,
+          offsetX: 30,
+          style: { fontSize: '24px' }
+        },
+        subtitle: {
+          text: data.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+          offsetX: 30,
+          style: { fontSize: '14px' }
+        }
+      };
+      new ApexCharts(document.querySelector(selector), options).render();
+    }
+
+    function renderBarChart(title, data, selector) {
+      const options = {
+        chart: { type: 'bar', height: 380, stacked: true },
+        series: [{ name: title, data: data }],
+        xaxis: { categories: Array.from({ length: data.length }, (_, i) => i + 1) },
+        title: { text: title, align: 'left', style: { fontSize: '18px' } }
+      };
+      new ApexCharts(document.querySelector(selector), options).render();
+    }
+
+    function renderDonutChart(title, data, selector) {
+      const options = {
+        chart: { type: 'donut', width: '100%', height: 400 },
+        series: data,
+        labels: Object.keys(data),
+        title: { text: title, align: 'center', style: { fontSize: '18px' } },
+        legend: { position: 'bottom' }
+      };
+      new ApexCharts(document.querySelector(selector), options).render();
+    }
+
+    function renderAreaChart(title, data, selector) {
+      const options = {
+        chart: { type: 'area', height: 340 },
+        series: [{ name: title, data: data }],
+        xaxis: { categories: Array.from({ length: data.length }, (_, i) => i + 1) },
+        title: { text: title, align: 'left', style: { fontSize: '18px' } }
+      };
+      new ApexCharts(document.querySelector(selector), options).render();
+    }
+  </script>
+</body>
+</html>

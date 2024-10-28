@@ -19,6 +19,10 @@ app.get('/estoque', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'produtos.html'));
 });
 
+app.get('/relatorios', (req, res) => {
+  res.sendFile(path.join(__dirname, 'views', 'relatorios.html'));
+});
+
 // Redirecionar todas as outras rotas para a página inicial
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'index.html'));
