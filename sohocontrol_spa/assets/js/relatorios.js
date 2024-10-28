@@ -224,6 +224,16 @@ function renderAreaChart(title, data, categories, selector) {
     chart: { type: 'area', height: 340 },
     series: [{ name: title, data: data }],
     xaxis: { categories: categories },
+    yaxis: {
+      labels: {
+        formatter: function(val) {
+          return val % 1 === 0 ? val : ''; // Mostra apenas números inteiros únicos
+        },
+        maxTicksLimit: 10, // Limita o número de ticks no eixo Y
+      },
+      min: 0, // Inicia o eixo Y em 0
+      forceNiceScale: true // Garante espaçamento adequado
+    },
     title: { text: title, align: 'left', style: { fontSize: '18px' } }
   };
   new ApexCharts(document.querySelector(selector), options).render();
