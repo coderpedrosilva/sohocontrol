@@ -95,8 +95,10 @@ function processarDadosVendas(vendas, startDate, endDate) {
   // Organiza os 10 produtos mais vendidos
   const topProdutos = Object.entries(produtosVendidos)
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 10)
-    .map(item => item[0]);
+    .slice(0, 10);
+
+  const produtosNomes = topProdutos.map(item => item[0]);
+  const produtosQuantidade = topProdutos.map(item => item[1]);
 
   // Organiza os 10 clientes que mais compraram
   const topClientes = Object.entries(clientesCompraram)
@@ -106,28 +108,12 @@ function processarDadosVendas(vendas, startDate, endDate) {
   const clientesNomes = topClientes.map(item => item[0]);
   const clientesQuantidade = topClientes.map(item => item[1]);
 
-  // Faz a requisição para obter o estoque dos produtos mais vendidos
-  buscarEstoqueProdutos(topProdutos, startDate, endDate, (estoqueProdutos) => {
-    renderizarGraficos(totalVendas, totalDescontos, totalLucro, vendasPorMes, estoqueProdutos, clientesNomes, clientesQuantidade);
-  });
-}
-
-// Função para buscar o estoque dos produtos mais vendidos
-function buscarEstoqueProdutos(produtos, startDate, endDate, callback) {
-  fetch('http://localhost:8080/api/produtos')
-    .then(response => response.json())
-    .then(data => {
-      const estoqueProdutos = data
-        .filter(produto => produtos.includes(produto.nome))
-        .map(produto => ({ nome: produto.nome, quantidade: produto.quantidade }));
-
-      callback(estoqueProdutos);
-    })
-    .catch(error => console.error('Erro ao buscar estoque de produtos:', error));
+  // Renderiza os gráficos com os dados de vendas
+  renderizarGraficos(totalVendas, totalDescontos, totalLucro, vendasPorMes, produtosNomes, produtosQuantidade, clientesNomes, clientesQuantidade);
 }
 
 // Função para renderizar os gráficos com os dados obtidos
-function renderizarGraficos(totalVendas, totalDescontos, totalLucro, vendasPorMes, estoqueProdutos, clientesNomes, clientesQuantidade) {
+function renderizarGraficos(totalVendas, totalDescontos, totalLucro, vendasPorMes, produtosNomes, produtosQuantidade, clientesNomes, clientesQuantidade) {
   const vendasVariacoes = distribuirVariações(totalVendas);
   const descontosVariacoes = distribuirVariações(totalDescontos);
   const lucroVariacoes = distribuirVariações(totalLucro);
@@ -136,9 +122,17 @@ function renderizarGraficos(totalVendas, totalDescontos, totalLucro, vendasPorMe
   renderSparkline('Total de Descontos', descontosVariacoes, '#spark1');
   renderSparkline('Lucro', lucroVariacoes, '#spark2');
   renderBarChart('Vendas por Mês', vendasPorMes, '#bar');
-  renderDonutChart('Produtos Mais Vendidos', estoqueProdutos.map(p => p.quantidade), '#donut');
+
+  // Ajusta para mostrar apenas os 10 produtos mais vendidos no gráfico de rosca
+  renderDonutChart(
+    'Produtos Mais Vendidos',
+    produtosQuantidade,
+    produtosNomes,
+    '#donut'
+  );
+
   renderAreaChart('Clientes que Mais Compraram', clientesQuantidade, clientesNomes, '#area');
-  renderLineChart('Estoque Atual dos 10 Produtos Mais Vendidos', estoqueProdutos.map(p => p.quantidade), estoqueProdutos.map(p => p.nome), '#line');
+  renderLineChart('Estoque Atual dos 10 Produtos Mais Vendidos', produtosQuantidade, produtosNomes, '#line');
 }
 
 // Função para distribuir o valor total em variações
@@ -182,23 +176,23 @@ function renderSparkline(title, data, selector) {
   new ApexCharts(document.querySelector(selector), options).render();
 }
 
+function renderDonutChart(title, data, labels, selector) {
+  const options = {
+    chart: { type: 'donut', width: '100%', height: 400 },
+    series: data,
+    labels: labels, // Usa os nomes reais dos produtos como rótulos
+    title: { text: title, align: 'center', style: { fontSize: '18px' } },
+    legend: { position: 'bottom' }
+  };
+  new ApexCharts(document.querySelector(selector), options).render();
+}
+
 function renderBarChart(title, data, selector) {
   const options = {
     chart: { type: 'bar', height: 380, stacked: true },
     series: [{ name: title, data: data }],
     xaxis: { categories: Array.from({ length: data.length }, (_, i) => i + 1) },
     title: { text: title, align: 'left', style: { fontSize: '18px' } }
-  };
-  new ApexCharts(document.querySelector(selector), options).render();
-}
-
-function renderDonutChart(title, data, selector) {
-  const options = {
-    chart: { type: 'donut', width: '100%', height: 400 },
-    series: data,
-    labels: data.map((_, index) => `Produto ${index + 1}`),
-    title: { text: title, align: 'center', style: { fontSize: '18px' } },
-    legend: { position: 'bottom' }
   };
   new ApexCharts(document.querySelector(selector), options).render();
 }
