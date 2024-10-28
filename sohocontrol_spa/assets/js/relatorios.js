@@ -66,23 +66,26 @@ function processarDadosVendas(vendas, startDate, endDate) {
 
   // Calcula os totais de vendas, descontos e lucro
   vendas.forEach(venda => {
-    const valorVenda = parseFloat(venda.valorTotal || 0);
+    const valorVenda = typeof venda.valorTotal === 'string' ? parseFloat(venda.valorTotal.replace(',', '.')) : parseFloat(venda.valorTotal || 0);
     let descontoEmReais = 0;
 
     if (venda.tipoDesconto === 'percentual') {
-      const valorOriginal = valorVenda / (1 - venda.descontoAplicado / 100);
-      descontoEmReais = parseFloat((valorOriginal * (venda.descontoAplicado / 100)).toFixed(2));
+      const valorOriginal = valorVenda / (1 - (venda.descontoAplicado / 100));
+      descontoEmReais = (valorOriginal * (venda.descontoAplicado / 100));
     } else {
-      descontoEmReais = parseFloat(venda.descontoAplicado || 0);
+      // Aplica o .replace apenas se for uma string
+      const descontoAplicado = typeof venda.descontoAplicado === 'string' ? parseFloat(venda.descontoAplicado.replace(',', '.')) : parseFloat(venda.descontoAplicado || 0);
+      descontoEmReais = descontoAplicado;
     }
 
-    totalVendas += valorVenda + descontoEmReais;
-    totalDescontos += descontoEmReais;
-    totalLucro += valorVenda;
+    // Arredonda os valores para duas casas decimais
+    totalVendas += parseFloat((valorVenda + descontoEmReais).toFixed(2));
+    totalDescontos += parseFloat(descontoEmReais.toFixed(2));
+    totalLucro += parseFloat(valorVenda.toFixed(2));
 
     // Ajusta para garantir que o mês esteja correto
     const mes = new Date(venda.dataVenda).getUTCMonth(); // Obtém o mês da venda (0-11)
-    vendasPorMes[mes] += valorVenda;
+    vendasPorMes[mes] += parseFloat(valorVenda.toFixed(2));
 
     const produtos = venda.nomeProdutos.split(', ');
     produtos.forEach(produto => {
@@ -113,7 +116,6 @@ function processarDadosVendas(vendas, startDate, endDate) {
   renderizarGraficos(totalVendas, totalDescontos, totalLucro, vendasPorMes, produtosNomes, produtosQuantidade, clientesNomes, clientesQuantidade);
 }
 
-// Função para renderizar os gráficos com os dados obtidos
 // Função para renderizar os gráficos com os dados obtidos
 function renderizarGraficos(totalVendas, totalDescontos, totalLucro, vendasPorMes, produtosNomes, produtosQuantidade, clientesNomes, clientesQuantidade) {
   const vendasVariacoes = distribuirVariações(totalVendas);
