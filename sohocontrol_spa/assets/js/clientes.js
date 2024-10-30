@@ -58,7 +58,7 @@ function atualizarTabelaClientes() {
 
 // Função para deletar cliente
 function deletarCliente(id) {
-  if (confirm('Tem certeza que deseja excluir o cliente?')) {
+  if (confirm('Tem certeza que deseja excluir o cliente e todos os pedidos relacionados?')) {
     fetch(`http://localhost:8080/api/clientes/${id}`, { method: 'DELETE' })
       .then(response => {
         if (response.ok) {
@@ -67,7 +67,7 @@ function deletarCliente(id) {
         } else if (response.status === 404) {
           alert('Cliente não encontrado.');
         } else {
-          alert('Erro ao excluir cliente. Verifique se há vendas associadas.');
+          alert('Erro ao excluir cliente.');
         }
       })
       .catch(error => console.error('Erro ao excluir cliente:', error));

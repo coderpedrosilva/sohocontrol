@@ -50,6 +50,9 @@ public class VendaController {
                 item.setVenda(venda);
             });
 
+            // Ajuste para salvar o valor parcial
+            venda.setValorParcial(venda.getValorParcial());
+
             vendaRepository.save(venda);
             return ResponseEntity.ok(venda);
         } catch (IllegalArgumentException e) {
@@ -100,22 +103,13 @@ public class VendaController {
     private VendaDTO mapToVendaDTO(Venda venda) {
         double valorTotal = venda.getValorTotal();
         double descontoAplicado = venda.getDescontoAplicado() != null ? venda.getDescontoAplicado() : 0.0;
-        double valorParcial;
-
-        // Cálculo do valor parcial
-        if ("reais".equalsIgnoreCase(venda.getTipoDesconto())) {
-            valorParcial = valorTotal + descontoAplicado; // Se o desconto é em reais
-        } else if ("percentual".equalsIgnoreCase(venda.getTipoDesconto())) {
-            valorParcial = valorTotal / (1 - (descontoAplicado / 100)); // Se o desconto é percentual
-        } else {
-            valorParcial = valorTotal; // Sem desconto
-        }
+        double valorParcial = venda.getValorParcial(); // Obtenção direta do banco de dados
 
         // Formatação do valor total com desconto
-        String valorTotalFormatado = String.format("%.2f", valorTotal);
+        String valorTotalFormatado = String.format("%.2f", valorTotal).replace(".", ",");
         if (descontoAplicado > 0) {
             if ("reais".equalsIgnoreCase(venda.getTipoDesconto())) {
-                valorTotalFormatado += String.format(" (Desconto de R$ %.2f)", descontoAplicado);
+                valorTotalFormatado += String.format(" (Desconto de R$ %.2f)", descontoAplicado).replace(".", ",");
             } else if ("percentual".equalsIgnoreCase(venda.getTipoDesconto())) {
                 valorTotalFormatado += String.format(" (Desconto de %.2f%%)", descontoAplicado);
             }
@@ -127,13 +121,11 @@ public class VendaController {
                 venda.getCliente().getNome(),
                 venda.getItens().stream().map(item -> item.getProduto().getNome()).collect(Collectors.joining(", ")),
                 venda.getItens().stream().map(item -> String.valueOf(item.getQuantidade())).collect(Collectors.joining(", ")),
-                venda.getItens().stream().map(item -> String.format("%.2f", item.getPrecoVenda())).collect(Collectors.joining(", ")),
-                String.format("%.2f", valorParcial), // Adicionando o valor parcial
-                valorTotalFormatado, // Mantendo a frase de desconto
-                venda.getDescontoAplicado() != null ? venda.getDescontoAplicado() : 0.0,
+                venda.getItens().stream().map(item -> String.format("%.2f", item.getPrecoVenda()).replace(".", ",")).collect(Collectors.joining(", ")),
+                String.format("%.2f", valorParcial).replace(".", ","),
+                valorTotalFormatado, // Passa o valor total formatado com a frase de desconto
+                descontoAplicado,
                 venda.getTipoDesconto() != null ? venda.getTipoDesconto() : ""
         );
     }
-
-
 }

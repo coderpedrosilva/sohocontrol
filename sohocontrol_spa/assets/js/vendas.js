@@ -416,17 +416,15 @@ function removerLinhaProdutoQuantidade(elemento) {
   }
 }
 
-// Função para registrar uma nova venda e resetar o formulário ao finalizar
 document.getElementById('vendaForm').addEventListener('submit', function(e) {
-  e.preventDefault(); // Impede o comportamento padrão do formulário
+  e.preventDefault();
 
   const clienteId = parseInt(document.getElementById('cliente_venda').dataset.clienteId, 10);
   if (!clienteId) {
-    alert("Cliente não selecionado corretamente."); // Verifica se o cliente foi selecionado
+    alert("Cliente não selecionado corretamente.");
     return;
   }
 
-  // Captura e verifica se todos os produtos têm um ID válido
   const itens = Array.from(document.querySelectorAll('.produto-quantidade')).map(linha => {
     const produtoId = parseInt(linha.querySelector('[name="produto_venda"]').dataset.produtoId, 10);
     const quantidade = parseInt(linha.querySelector('[name="quantidade_venda"]').value) || 0;
@@ -435,62 +433,48 @@ document.getElementById('vendaForm').addEventListener('submit', function(e) {
       alert("Produto não selecionado corretamente.");
       throw new Error("Produto não informado ou inválido.");
     }
+
     return {
       produto: { id: produtoId },
       quantidade: quantidade
     };
   });
 
-// Obtém os valores do formulário: total, desconto e tipo de desconto
-const valorTotal = parseFloat(document.getElementById('valor_total').value) || 0;
-const desconto = parseFloat(document.getElementById('desconto').value.replace(',', '.')) || 0; // Convertendo para double
-const tipoDesconto = document.getElementById('tipo_desconto').value;
+  const valorTotal = parseFloat(document.getElementById('valor_total').value) || 0;
+  const valorParcial = parseFloat(document.getElementById('valor_parcial').value) || 0; // Captura o valor parcial
+  const desconto = parseFloat(document.getElementById('desconto').value.replace(',', '.')) || 0;
+  const tipoDesconto = document.getElementById('tipo_desconto').value;
 
-// Cria um objeto de venda com as informações coletadas
-const venda = {
-  dataVenda: document.getElementById('data_venda').value, // Data da venda
-  cliente: { id: clienteId }, // ID do cliente selecionado
-  itens: itens, // Lista de produtos e suas quantidades
-  valorTotal: valorTotal.toFixed(2), // Valor total formatado com duas casas decimais
-  descontoAplicado: parseFloat(desconto.toFixed(2)), // Converte para double e garante duas casas decimais
-  tipoDesconto: tipoDesconto // Tipo de desconto aplicado (reais ou percentual)
-};
+  const venda = {
+    dataVenda: document.getElementById('data_venda').value,
+    cliente: { id: clienteId },
+    itens: itens,
+    valorTotal: valorTotal.toFixed(2),
+    valorParcial: valorParcial.toFixed(2), // Inclui o valor parcial no payload
+    descontoAplicado: parseFloat(desconto.toFixed(2)),
+    tipoDesconto: tipoDesconto
+  };
 
-// Envia o objeto de venda para o backend usando uma requisição POST
-fetch('http://localhost:8080/api/vendas', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(venda) // Converte o objeto de venda para JSON
-})
+  fetch('http://localhost:8080/api/vendas', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(venda)
+  })
   .then(response => {
-    // Verifica se a resposta foi bem-sucedida
     if (!response.ok) {
-      // Caso contrário, lança um erro com a mensagem retornada pelo servidor
       return response.json().then(err => { throw new Error(err.error); });
     }
-    return response.json(); // Retorna a resposta JSON se bem-sucedida
+    return response.json();
   })
   .then(data => {
-    // Informa o usuário sobre o sucesso do registro da venda
     alert("Venda registrada com sucesso!");
-
-    // Reseta o formulário de venda e limpa os campos de valor parcial e total
     document.getElementById('vendaForm').reset();
     document.getElementById('valor_parcial').value = '';
     document.getElementById('valor_total').value = '';
-
-    // Remove todas as linhas de produto, exceto a primeira, para redefinir o estado inicial
-    const container = document.getElementById('produto-quantidade-container');
-    while (container.children.length > 1) {
-      container.removeChild(container.lastChild);
-    }
-
-    // Recarrega a lista de produtos e vendas para refletir as atualizações no frontend
     carregarProdutos();
     carregarVendas();
   })
   .catch(error => {
-    // Exibe uma mensagem de erro caso ocorra uma falha no registro da venda
     alert("Erro ao registrar a venda: " + error.message);
   });
 });
@@ -630,23 +614,11 @@ function filtrarLinhasTabela(termoBusca) {
 }
 
 // Função para renderizar a tabela de vendas considerando a busca
-// Função para renderizar a tabela de vendas considerando a busca
 function renderizarTabelaVendas() {
   let tbody = document.querySelector('#tabelaVendas tbody');
-  tbody.innerHTML = ''; // Limpa a tabela antes de adicionar novas linhas
+  tbody.innerHTML = '';
 
-  let termoBusca = document.getElementById('buscarVenda').value.toLowerCase();
-  let vendasFiltradas = vendas.filter(venda => 
-    venda.nomeCliente.toLowerCase().includes(termoBusca) || 
-    venda.nomeProdutos.toLowerCase().includes(termoBusca)
-  );
-
-  let inicio = (paginaAtualVendas - 1) * vendasPorPagina;
-  let fim = inicio + vendasPorPagina;
-
-  let vendasExibidas = termoBusca ? vendasFiltradas : vendas.slice(inicio, fim);
-
-  vendasExibidas.forEach(venda => {
+  vendas.forEach(venda => {
     let row = tbody.insertRow();
     row.insertCell().innerText = venda.codigoVenda;
     row.insertCell().innerText = formatarData(venda.dataVenda);
@@ -654,10 +626,9 @@ function renderizarTabelaVendas() {
     row.insertCell().innerText = venda.nomeProdutos;
     row.insertCell().innerText = venda.quantidades;
     row.insertCell().innerText = venda.precosVenda;
-    row.insertCell().innerText = venda.valorParcial; 
-    row.insertCell().innerText = venda.valorTotal; // Coluna única para "Valor Total da Venda"
+    row.insertCell().innerText = venda.valorParcial;
+    row.insertCell().innerText = venda.valorTotal; // Exibe a frase de desconto no fronten
 
-    // Adiciona as ações (ícones) para cada venda
     let actionCell = row.insertCell();
     actionCell.innerHTML = `
       <div class="icon-container">
@@ -668,7 +639,6 @@ function renderizarTabelaVendas() {
     `;
   });
 
-  // Renderizar paginação apenas se não houver busca ativa
   if (!termoBusca) {
     renderizarPaginacaoVendas();
   }

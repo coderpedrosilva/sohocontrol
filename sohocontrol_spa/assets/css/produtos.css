@@ -1,3 +1,7 @@
+body {
+  padding-bottom: 20px; /* Ajuste o valor conforme necessário */
+}
+
 .navbar-brand {
   margin-left: 16px; /* Ajuste o valor conforme necessário */
 }

@@ -36,7 +36,7 @@ function atualizarGraficos(startDate, endDate) {
     return response.json();
   })
   .then(data => {
-    processarDadosVendas(data, startDate, endDate);
+    processarDadosVendas(data);
   })
   .catch(error => {
     console.error('Erro ao buscar dados:', error);
@@ -56,42 +56,43 @@ function limparGraficos() {
 }
 
 // Função para processar dados das vendas e atualizar os gráficos
-function processarDadosVendas(vendas, startDate, endDate) {
+function processarDadosVendas(vendas) {
   let totalVendas = 0;
   let totalDescontos = 0;
   let totalLucro = 0;
-  let vendasPorMes = Array(12).fill(0);
+  let lucroPorMes = Array(12).fill(0);
   let produtosVendidos = {};
   let clientesCompraram = {};
 
   // Calcula os totais de vendas, descontos e lucro
   vendas.forEach(venda => {
     const valorVenda = typeof venda.valorTotal === 'string' ? parseFloat(venda.valorTotal.replace(',', '.')) : parseFloat(venda.valorTotal || 0);
-    let descontoEmReais = 0;
+    const valorParcial = typeof venda.valorParcial === 'string' ? parseFloat(venda.valorParcial.replace(',', '.')) : parseFloat(venda.valorParcial || 0);
+    let descontoAplicado = typeof venda.descontoAplicado === 'string' ? parseFloat(venda.descontoAplicado.replace(',', '.')) : parseFloat(venda.descontoAplicado || 0);
 
+    // Se o tipo de desconto for percentual, converte para valor em reais
     if (venda.tipoDesconto === 'percentual') {
-      const valorOriginal = valorVenda / (1 - (venda.descontoAplicado / 100));
-      descontoEmReais = (valorOriginal * (venda.descontoAplicado / 100));
-    } else {
-      // Aplica o .replace apenas se for uma string
-      const descontoAplicado = typeof venda.descontoAplicado === 'string' ? parseFloat(venda.descontoAplicado.replace(',', '.')) : parseFloat(venda.descontoAplicado || 0);
-      descontoEmReais = descontoAplicado;
+      descontoAplicado = valorParcial * (descontoAplicado / 100);
     }
 
-    // Arredonda os valores para duas casas decimais
-    totalVendas += parseFloat((valorVenda + descontoEmReais).toFixed(2));
-    totalDescontos += parseFloat(descontoEmReais.toFixed(2));
-    totalLucro += parseFloat(valorVenda.toFixed(2));
+    totalVendas += valorParcial;
+    totalDescontos += descontoAplicado;
+    totalLucro += valorVenda;
 
     // Ajusta para garantir que o mês esteja correto
     const mes = new Date(venda.dataVenda).getUTCMonth(); // Obtém o mês da venda (0-11)
-    vendasPorMes[mes] += parseFloat(valorVenda.toFixed(2));
+    lucroPorMes[mes] += valorVenda;
 
+    // Conta a quantidade de produtos vendidos
     const produtos = venda.nomeProdutos.split(', ');
-    produtos.forEach(produto => {
-      produtosVendidos[produto] = (produtosVendidos[produto] || 0) + 1;
+    const quantidades = venda.quantidades.split(', ').map(qtd => parseInt(qtd, 10));
+
+    produtos.forEach((produto, index) => {
+      const quantidade = quantidades[index] || 0;
+      produtosVendidos[produto] = (produtosVendidos[produto] || 0) + quantidade;
     });
 
+    // Conta a quantidade de compras por cliente
     const cliente = venda.nomeCliente;
     clientesCompraram[cliente] = (clientesCompraram[cliente] || 0) + 1;
   });
@@ -113,35 +114,27 @@ function processarDadosVendas(vendas, startDate, endDate) {
   const clientesQuantidade = topClientes.map(item => item[1]);
 
   // Renderiza os gráficos com os dados de vendas
-  renderizarGraficos(totalVendas, totalDescontos, totalLucro, vendasPorMes, produtosNomes, produtosQuantidade, clientesNomes, clientesQuantidade);
+  renderizarGraficos(totalVendas, totalDescontos, totalLucro, lucroPorMes, produtosNomes, produtosQuantidade, clientesNomes, clientesQuantidade);
 }
 
 // Função para renderizar os gráficos com os dados obtidos
-function renderizarGraficos(totalVendas, totalDescontos, totalLucro, vendasPorMes, produtosNomes, produtosQuantidade, clientesNomes, clientesQuantidade) {
-  const vendasVariacoes = distribuirVariações(totalVendas);
-  const descontosVariacoes = distribuirVariações(totalDescontos);
-  const lucroVariacoes = distribuirVariações(totalLucro);
+function renderizarGraficos(totalVendas, totalDescontos, totalLucro, lucroPorMes, produtosNomes, produtosQuantidade, clientesNomes, clientesQuantidade) {
+  renderSparkline('Total de Vendas', totalVendas, '#totalSales');
+  renderSparkline('Total de Descontos', totalDescontos, '#spark1');
+  renderSparkline('Lucro', totalLucro, '#spark2');
 
-  renderSparkline('Total de Vendas', vendasVariacoes, '#totalSales');
-  renderSparkline('Total de Descontos', descontosVariacoes, '#spark1');
-  renderSparkline('Lucro', lucroVariacoes, '#spark2');
-
-  // Ajusta o gráfico de "Vendas por Mês" para corresponder corretamente aos meses
-  renderBarChart('Vendas por Mês', vendasPorMes, '#bar');
-
+  renderBarChart('Lucro por Mês', lucroPorMes, '#bar');
   renderDonutChart('Produtos Mais Vendidos', produtosQuantidade, produtosNomes, '#donut');
   renderAreaChart('Clientes que Mais Compraram', clientesQuantidade, clientesNomes, '#area');
 
-  // Faz uma requisição para buscar o estoque total dos produtos mais vendidos
+  // Obtém o estoque dos produtos mais vendidos
   fetch('http://localhost:8080/api/produtos')
     .then(response => response.json())
     .then(data => {
-      // Filtra o estoque dos 10 produtos mais vendidos
       const estoqueProdutosMaisVendidos = data
         .filter(produto => produtosNomes.includes(produto.nome))
         .map(produto => ({ nome: produto.nome, quantidade: produto.quantidade }));
 
-      // Atualiza o gráfico de linhas com o estoque total dos produtos mais vendidos
       renderLineChart(
         'Estoque dos Produtos Mais Vendidos',
         estoqueProdutosMaisVendidos.map(p => p.quantidade),
@@ -152,46 +145,29 @@ function renderizarGraficos(totalVendas, totalDescontos, totalLucro, vendasPorMe
     .catch(error => console.error('Erro ao buscar estoque dos produtos mais vendidos:', error));
 }
 
-// Função para criar o gráfico de barras com correspondência correta dos meses
-function renderBarChart(title, data, selector) {
-  const options = {
-    chart: { type: 'bar', height: 380, stacked: true },
-    series: [{ name: title, data: data }],
-    xaxis: {
-      categories: [
-        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 
-        'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 
-        'Novembro', 'Dezembro'
-      ] // Define os meses como categorias
-    },
-    title: { text: title, align: 'left', style: { fontSize: '18px' } }
-  };
-  new ApexCharts(document.querySelector(selector), options).render();
-}
-
-// Função para distribuir o valor total em variações
+// Função para distribuir o valor total em variações para criar efeito pontiagudo
 function distribuirVariações(total) {
-  const pontos = 24;
+  const pontos = 24; // Número de pontos para criar os "espinhos"
   const variacoes = Array(pontos).fill(0);
   let soma = 0;
 
   for (let i = 0; i < pontos - 1; i++) {
-    const variacao = Math.random() * (total - soma) * 0.1;
+    const variacao = Math.random() * (total - soma) * 0.2; // Variações aleatórias
     variacoes[i] = variacao;
     soma += variacao;
   }
 
-  variacoes[pontos - 1] = total - soma;
+  variacoes[pontos - 1] = total - soma; // Ajusta o último ponto para totalizar o valor
   return variacoes;
 }
 
 // Função para criar gráficos sparkline com o valor acima e o título abaixo
 function renderSparkline(title, data, selector) {
-  const totalValue = data.reduce((a, b) => a + b, 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  // Distribui as variações para criar o efeito visual pontiagudo
+  const variacoes = distribuirVariações(data);
 
+  // Define a cor do gráfico
   let color = '#008FFB'; // Azul padrão
-
-  // Define a cor como cinza translúcido para "Total de Vendas" e "Total de Descontos"
   if (title === 'Total de Vendas' || title === 'Total de Descontos') {
     color = 'rgba(160, 160, 160, 0.5)'; // Cinza com 50% de opacidade
   }
@@ -203,25 +179,25 @@ function renderSparkline(title, data, selector) {
       sparkline: { enabled: true }
     },
     stroke: { 
-      curve: 'straight', // Altera para uma curva reta, criando um efeito mais pontudo
-      width: 5
+      curve: 'straight', // Linha reta para criar o efeito pontiagudo
+      width: 4 // Espessura da linha
     },
-    series: [{ name: title, data: data }],
-    colors: [color], // Aplica a cor correspondente com opacidade
+    series: [{ name: title, data: variacoes }],
+    colors: [color], // Cor aplicada
     title: {
-      text: totalValue, // Exibe o valor total na parte superior
+      text: parseFloat(data).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
       offsetX: 30,
-      style: { fontSize: '24px' }
+      style: { fontSize: '24px', color: '#263238' }
     },
     subtitle: {
-      text: title, // Exibe o título na parte inferior
+      text: title,
       offsetX: 30,
-      style: { fontSize: '14px' }
+      style: { fontSize: '14px', color: '#78909C' }
     },
     tooltip: {
       y: {
         formatter: function(value) {
-          return value.toFixed(2); // Limita a duas casas decimais
+          return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
       }
     }
@@ -229,9 +205,25 @@ function renderSparkline(title, data, selector) {
   new ApexCharts(document.querySelector(selector), options).render();
 }
 
+function renderBarChart(title, data, selector) {
+  const options = {
+    chart: { type: 'bar', height: 380 },
+    series: [{ name: title, data: data }],
+    xaxis: {
+      categories: [
+        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 
+        'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 
+        'Novembro', 'Dezembro'
+      ]
+    },
+    title: { text: title, align: 'left', style: { fontSize: '18px' } }
+  };
+  new ApexCharts(document.querySelector(selector), options).render();
+}
+
 function renderDonutChart(title, data, labels, selector) {
   const options = {
-    chart: { type: 'donut', width: '100%', height: 400 },
+    chart: { type: 'donut', height: 400 },
     series: data,
     labels: labels,
     title: { text: title, align: 'center', style: { fontSize: '18px' } },
@@ -241,22 +233,25 @@ function renderDonutChart(title, data, labels, selector) {
 }
 
 function renderAreaChart(title, data, categories, selector) {
+  // Substitui valores NaN por 0 no array de dados
+  const sanitizedData = data.map(value => (isNaN(value) || value === null) ? 0 : value);
+
   const options = {
     chart: { type: 'area', height: 340 },
-    series: [{ name: title, data: data }],
+    series: [{ name: title, data: sanitizedData }],
     xaxis: { categories: categories },
     yaxis: {
       labels: {
         formatter: function(val) {
-          return val % 1 === 0 ? val : ''; // Mostra apenas números inteiros únicos
-        },
-        maxTicksLimit: 10, // Limita o número de ticks no eixo Y
+          return Math.floor(val); // Exibe apenas inteiros
+        }
       },
-      min: 0, // Inicia o eixo Y em 0
-      forceNiceScale: true // Garante espaçamento adequado
+      min: 0, // Começa o eixo Y em 0
+      forceNiceScale: true // Ajusta o espaçamento dos ticks
     },
     title: { text: title, align: 'left', style: { fontSize: '18px' } }
   };
+
   new ApexCharts(document.querySelector(selector), options).render();
 }
 
@@ -265,15 +260,6 @@ function renderLineChart(title, data, categories, selector) {
     chart: { type: 'line', height: 340 },
     series: [{ name: title, data: data }],
     xaxis: { categories: categories },
-    yaxis: {
-      labels: {
-        formatter: function(val) {
-          return val % 1 === 0 ? val : ''; // Mostra apenas números inteiros
-        },
-      },
-      min: 0, // Inicia o eixo Y em 0
-      forceNiceScale: true // Garante espaçamento adequado
-    },
     title: { text: title, align: 'left', style: { fontSize: '18px' } }
   };
   new ApexCharts(document.querySelector(selector), options).render();

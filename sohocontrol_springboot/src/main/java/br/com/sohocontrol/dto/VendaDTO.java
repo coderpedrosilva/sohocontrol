@@ -16,8 +16,9 @@ public class VendaDTO {
     private String tipoDesconto;
 
     // Construtor atualizado
-    public VendaDTO(Long codigoVenda, LocalDate dataVenda, String nomeCliente, String nomeProdutos, String quantidades,
-                    String precosVenda, String valorParcial, String valorTotal, double descontoAplicado, String tipoDesconto) {
+    public VendaDTO(Long codigoVenda, LocalDate dataVenda, String nomeCliente, String nomeProdutos,
+                    String quantidades, String precosVenda, String valorParcial,
+                    String valorTotal, double descontoAplicado, String tipoDesconto) {
         this.codigoVenda = codigoVenda;
         this.dataVenda = dataVenda;
         this.nomeCliente = nomeCliente;
@@ -109,5 +110,21 @@ public class VendaDTO {
 
     public void setTipoDesconto(String tipoDesconto) {
         this.tipoDesconto = tipoDesconto;
+    }
+
+    @Override
+    public String toString() {
+        return "VendaDTO{" +
+                "codigoVenda=" + codigoVenda +
+                ", dataVenda=" + dataVenda +
+                ", nomeCliente='" + nomeCliente + '\'' +
+                ", nomeProdutos='" + nomeProdutos + '\'' +
+                ", quantidades='" + quantidades + '\'' +
+                ", precosVenda='" + precosVenda + '\'' +
+                ", valorParcial='" + valorParcial + '\'' +
+                ", valorTotal='" + valorTotal + '\'' +
+                ", descontoAplicado=" + descontoAplicado +
+                ", tipoDesconto='" + tipoDesconto + '\'' +
+                '}';
     }
 }
