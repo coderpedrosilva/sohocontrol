@@ -4,14 +4,12 @@ Apex.dataLabels = { enabled: false };
 
 // Função para aplicar o filtro de período
 document.getElementById('applyFilter').addEventListener('click', function() {
-  const startMonth = document.getElementById('startMonth').value;
-  const endMonth = document.getElementById('endMonth').value;
-  if (startMonth && endMonth) {
-    const startDate = `${startMonth}-01`;
-    const endDate = obterUltimoDiaDoMes(endMonth);
+  const startDate = document.getElementById('startDate').value;
+  const endDate = document.getElementById('endDate').value;
+  if (startDate && endDate) {
     atualizarGraficos(startDate, endDate);
   } else {
-    alert('Por favor, selecione o período inicial e final.');
+    alert('Por favor, selecione a data inicial e final.');
   }
 });
 
@@ -43,6 +41,18 @@ function atualizarGraficos(startDate, endDate) {
     alert('Erro ao buscar dados. Verifique a API ou o console para mais detalhes.');
   });
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  const dataAtual = new Date();
+  const anoAtual = dataAtual.getFullYear();
+  const mesAtual = String(dataAtual.getMonth() + 1).padStart(2, '0');
+  const diaAtual = String(dataAtual.getDate()).padStart(2, '0');
+
+  document.getElementById('startDate').value = `${anoAtual}-${mesAtual}-01`; // Primeiro dia do mês
+  document.getElementById('endDate').value = `${anoAtual}-${mesAtual}-${diaAtual}`; // Dia atual
+
+  atualizarGraficos(`${anoAtual}-${mesAtual}-01`, `${anoAtual}-${mesAtual}-${diaAtual}`);
+});
 
 // Função para limpar gráficos antes de renderizar novos
 function limparGraficos() {

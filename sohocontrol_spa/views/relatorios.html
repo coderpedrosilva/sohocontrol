@@ -12,7 +12,9 @@
 <body>
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="#">Software</a>
+    <a class="navbar-brand" href="#">
+      <img src="../assets/img/logo.png" alt="Logo" >
+    </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -38,18 +40,18 @@
   <div class="container filter-section">
     <div class="row">
       <div class="col-md-3">
-        <label for="startMonth">Mês/Ano Inicial:</label>
-        <input type="month" id="startMonth" class="form-control">
+        <label for="startDate">Data Inicial:</label>
+        <input type="date" id="startDate" class="form-control">
       </div>
       <div class="col-md-3">
-        <label for="endMonth">Mês/Ano Final:</label>
-        <input type="month" id="endMonth" class="form-control">
+        <label for="endDate">Data Final:</label>
+        <input type="date" id="endDate" class="form-control">
       </div>
       <div class="col-md-2">
         <button id="applyFilter" class="btn btn-primary mt-4">Aplicar Filtro</button>
       </div>
     </div>
-  </div>
+  </div>  
 
   <!-- Gráficos -->
   <div class="container">

@@ -2,8 +2,13 @@ body {
   padding-bottom: 20px; /* Ajuste o valor conforme necessário */
 }
 
+.navbar-nav {
+  margin-left: -5px; /* Reduz o espaçamento entre a imagem e o primeiro item da lista */
+}
+
 .navbar-brand {
   margin-left: 16px; /* Ajuste o valor conforme necessário */
+  padding-right: 5px; /* Reduz o espaçamento à direita da imagem */
 }
 
 /* Ajuste para a setinha no campo de seleção do Estado */
@@ -14,6 +19,7 @@ color: #0d6efd !important; /* Azul do Bootstrap para link ativo */
 .navbar-nav .nav-link {
   color: #000 !important; /* Preto para link inativo */
 }
+
 .nav-tabs .nav-link.active {
 color: #0d6efd !important; /* Azul do Bootstrap para aba ativa */
 }
@@ -21,15 +27,18 @@ color: #0d6efd !important; /* Azul do Bootstrap para aba ativa */
 .nav-tabs .nav-link {
   color: #000 !important; /* Preto para aba inativa */
 }
+
 .select-container {
   position: relative;
 }
+
 .select-container select {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
   padding-right: 25px; /* Espaço para a setinha */
 }
+
 .select-container::after {
   content: '\25BC'; /* Unicode para setinha */
   position: absolute;
@@ -45,11 +54,13 @@ color: #0d6efd !important; /* Azul do Bootstrap para aba ativa */
   align-items: center;
   gap: 10px; /* Espaçamento entre os ícones */
 }
+
 .icon-container i {
   cursor: pointer;
   font-size: 20px;
   transition: transform 0.2s;
 }
+
 .icon-container i:hover {
   transform: scale(1.2);
 }
@@ -58,9 +69,11 @@ color: #0d6efd !important; /* Azul do Bootstrap para aba ativa */
 .fa-pen-to-square {
   color: #007bff; 
 }
+
 .fa-floppy-disk {
   color: #28a745; 
 }
+
 .fa-trash {
   color: #dc3545;
 }

@@ -8,19 +8,21 @@ body {
 
 .navbar-nav .nav-link.active {
   color: #0d6efd !important; /* Azul do Bootstrap para link ativo */
-  }
+}
 
-  .navbar-nav .nav-link {
-    color: #000 !important; /* Preto para link inativo */
-  }
-  .nav-tabs .nav-link.active {
+.navbar-nav .nav-link {
+  color: #000 !important; /* Preto para link inativo */
+}
+
+.nav-tabs .nav-link.active {
   color: #0d6efd !important; /* Azul do Bootstrap para aba ativa */
-  }
+}
 
-  .nav-tabs .nav-link {
-    color: #000 !important; /* Preto para aba inativa */
-  }
-  .autocomplete-suggestions {
+.nav-tabs .nav-link {
+  color: #000 !important; /* Preto para aba inativa */
+}
+
+.autocomplete-suggestions {
     display: none; /* Oculta a lista de sugestões inicialmente */
     border: 1px solid #ddd;
     max-height: 150px;
@@ -29,83 +31,83 @@ body {
     position: absolute;
     z-index: 1000;
     width: auto;
-  }
+}
 
-  .autocomplete-suggestions div {
+.autocomplete-suggestions div {
     padding: 10px;
     cursor: pointer;
-  }
+}
 
-  .autocomplete-suggestions div:hover {
+.autocomplete-suggestions div:hover {
     background-color: #f0f0f0;
-  }
+}
 
-  .select-container {
+.select-container {
     display: flex;
     align-items: center;
     position: relative;
-  }
+}
 
-  .select-container select {
+.select-container select {
     padding-left: 25px;
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-  }
+}
 
-  .select-container::before {
+.select-container::before {
     content: '\25BC';
     position: absolute;
     left: 10px;
     font-size: 12px;
     pointer-events: none;
-  }
+}
 
-  .autocomplete-suggestions {
+.autocomplete-suggestions {
     border: none !important;
     box-shadow: none !important;
     margin: 0;
     padding: 0;
-  }
+}
 
-  .icon-container {
+.icon-container {
     display: flex;
     gap: 16px; /* Espaçamento aumentado entre os ícones */
-  }
+}
 
-  .icon-container i {
+.icon-container i {
     cursor: pointer;
     font-size: 20px; /* Tamanho dos ícones */
     transition: transform 0.2s; /* Efeito de clique */
-  }
+}
 
-  .icon-container i:hover {
+.icon-container i:hover {
     transform: scale(1.2); /* Aumenta o tamanho ao passar o mouse */
-  }
+}
 
-  .fa-file-image {
+.fa-file-image {
     color: #007bff; 
-  }
+}
 
-  .fa-file-pdf {
+.fa-file-pdf {
     color: #FF4D4D; 
-  }
+}
 
-  .fa-trash {
+.fa-trash {
     color: #dc3545; 
+}
+
+.navbar-toggler {
+    margin-right: 15px; /* Adiciona margem à direita do botão hambúrguer */
+}
+  
+@media (max-width: 991.98px) { /* Aplica o estilo apenas em telas menores */
+  .navbar-collapse {
+    padding-left: 15px; /* Adiciona margem à esquerda apenas no menu hambúrguer */
+    padding-right: 15px; /* Adiciona padding à direita no colapso */
   }
 
-  .navbar-toggler {
-    margin-right: 15px; /* Adiciona margem à direita do botão hambúrguer */
+  .navbar-nav .nav-link {
+    padding-left: 0; /* Remove o padding adicional dos links no modo colapsado */
   }
-  
-  @media (max-width: 991.98px) { /* Aplica o estilo apenas em telas menores */
-    .navbar-collapse {
-      padding-left: 15px; /* Adiciona margem à esquerda apenas no menu hambúrguer */
-      padding-right: 15px; /* Adiciona padding à direita no colapso */
-    }
-  
-    .navbar-nav .nav-link {
-      padding-left: 0; /* Remove o padding adicional dos links no modo colapsado */
-    }
-  }
+}

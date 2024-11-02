@@ -81,7 +81,7 @@ function deletarCliente(id) {
 // Habilita a edição dos dados de um cliente
 function habilitarEdicaoCliente(id, editIcon) {
   let row = editIcon.closest('tr');
-  let cells = row.querySelectorAll('td:not(:last-child)');
+  let cells = Array.from(row.cells).slice(1, -1); // Exclui a primeira (ID) e a última célula (Ações)
 
   cells.forEach(cell => {
     let input = document.createElement('input');
@@ -99,7 +99,8 @@ function habilitarEdicaoCliente(id, editIcon) {
 // Salva a edição dos dados de um cliente
 function salvarEdicaoCliente(id, saveIcon) {
   let row = saveIcon.closest('tr');
-  let cells = row.querySelectorAll('td:not(:last-child)');
+  let cells = Array.from(row.cells).slice(1, -1); // Exclui a primeira (ID) e a última célula (Ações)
+
   let clientData = {
     nome: cells[0].querySelector('input').value,
     cpfCnpj: cells[1].querySelector('input').value,
@@ -145,6 +146,8 @@ function renderizarTabelaClientes() {
   clientesPagina.forEach(cliente => {
     let row = tbody.insertRow();
     row.setAttribute('data-id', cliente.id);
+
+    row.insertCell().innerText = cliente.id; // Código do Cliente
     row.insertCell().innerText = cliente.nome;
     row.insertCell().innerText = cliente.cpfCnpj;
     row.insertCell().innerText = cliente.endereco;
