@@ -225,14 +225,15 @@ function renderizarPaginacaoProdutos() {
 // Função para habilitar edição de produto
 function habilitarEdicaoProduto(id, editIcon) {
   let row = editIcon.closest('tr');
-  let cells = row.querySelectorAll('td:not(:last-child)');
+  let cells = Array.from(row.cells).slice(1, -1); // Exclui a primeira (Código do Produto) e a última célula (Ações)
 
   cells.forEach((cell, index) => {
     let input = document.createElement('input');
     input.type = 'text';
     input.className = 'form-control';
 
-    if (index === 6 || index === 7) {
+    // Formata o preço com vírgula se for o campo de preço
+    if (index === 5 || index === 6) { 
       input.value = cell.innerText.replace(',', '.');
     } else {
       input.value = cell.innerText;
@@ -249,15 +250,16 @@ function habilitarEdicaoProduto(id, editIcon) {
 // Função para salvar edição de produto
 function salvarEdicaoProduto(id, saveIcon) {
   let row = saveIcon.closest('tr');
-  let cells = row.querySelectorAll('td:not(:last-child)');
+  let cells = Array.from(row.cells).slice(1, -1); // Exclui a primeira (Código do Produto) e a última célula (Ações)
+
   let productData = {
-    nome: cells[1].querySelector('input').value,
-    fornecedor: cells[2].querySelector('input').value,
-    origem: cells[3].querySelector('input').value,
-    descricao: cells[4].querySelector('input').value,
-    quantidade: parseInt(cells[5].querySelector('input').value, 10) || 0,
-    precoCompra: parseFloat(cells[6].querySelector('input').value.replace(',', '.')) || 0,
-    precoVenda: parseFloat(cells[7].querySelector('input').value.replace(',', '.')) || 0
+    nome: cells[0].querySelector('input').value,
+    fornecedor: cells[1].querySelector('input').value,
+    origem: cells[2].querySelector('input').value,
+    descricao: cells[3].querySelector('input').value,
+    quantidade: parseInt(cells[4].querySelector('input').value, 10) || 0,
+    precoCompra: parseFloat(cells[5].querySelector('input').value.replace(',', '.')) || 0,
+    precoVenda: parseFloat(cells[6].querySelector('input').value.replace(',', '.')) || 0
   };
 
   fetch(`http://localhost:8080/api/produtos/${id}`, {
