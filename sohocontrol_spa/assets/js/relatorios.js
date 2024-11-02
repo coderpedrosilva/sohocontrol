@@ -162,7 +162,7 @@ function distribuirVariações(total) {
   let soma = 0;
 
   for (let i = 0; i < pontos - 1; i++) {
-    const variacao = Math.random() * (total - soma) * 0.2; // Variações aleatórias
+    const variacao = Math.random() * (total - soma) * 0.1; // Variações aleatórias
     variacoes[i] = variacao;
     soma += variacao;
   }

@@ -89,7 +89,7 @@ color: #0d6efd !important; /* Azul do Bootstrap para aba ativa */
 
 @media (max-width: 991.98px) { /* Aplica o estilo apenas em telas menores */
   .navbar-collapse {
-    padding-left: 15px; /* Adiciona margem à esquerda apenas no menu hambúrguer */
+    padding-left: 20px; /* Adiciona margem à esquerda apenas no menu hambúrguer */
     padding-right: 15px; /* Adiciona padding à direita no colapso */
   }
 
