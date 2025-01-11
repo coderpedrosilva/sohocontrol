@@ -75,6 +75,7 @@ document.getElementById('produtoForm').addEventListener('submit', function(e) {
 
   let precoCompra = document.getElementById('preco_compra').value.replace(',', '.');
   let precoVenda = document.getElementById('preco_venda').value.replace(',', '.');
+  let imposto = document.getElementById('imposto').value.replace(',', '.'); // Certifique-se de capturar corretamente
 
   let product = {
     nome: document.getElementById('nome_produto').value,
@@ -83,6 +84,7 @@ document.getElementById('produtoForm').addEventListener('submit', function(e) {
     descricao: document.getElementById('descricao').value,
     quantidade: parseInt(document.getElementById('quantidade').value, 10) || 0,
     precoCompra: parseFloat(precoCompra) || 0,
+    imposto: parseFloat(imposto) || 0, // Certifique-se de que o imposto está no lugar correto
     precoVenda: parseFloat(precoVenda) || 0
   };
 
@@ -143,8 +145,9 @@ function renderizarTabelaProdutos() {
     row.insertCell().innerText = produto.descricao;
     row.insertCell().innerText = produto.quantidade;
     row.insertCell().innerText = formatarPreco(produto.precoCompra);
+    row.insertCell().innerText = formatarPreco(produto.imposto); // Campo de imposto corretamente posicionado
     row.insertCell().innerText = formatarPreco(produto.precoVenda);
-
+  
     let actionCell = row.insertCell();
     actionCell.innerHTML = `
       <div class="icon-container">
@@ -153,7 +156,7 @@ function renderizarTabelaProdutos() {
         <i class="fa-solid fa-trash" onclick="deletarProduto(${produto.id})"></i>
       </div>
     `;
-  });
+  });  
 }
 
 // Função para renderizar a paginação de produtos
@@ -259,7 +262,8 @@ function salvarEdicaoProduto(id, saveIcon) {
     descricao: cells[3].querySelector('input').value,
     quantidade: parseInt(cells[4].querySelector('input').value, 10) || 0,
     precoCompra: parseFloat(cells[5].querySelector('input').value.replace(',', '.')) || 0,
-    precoVenda: parseFloat(cells[6].querySelector('input').value.replace(',', '.')) || 0
+    imposto: parseFloat(cells[6].querySelector('input').value.replace(',', '.')) || 0, // Corrigido: imposto na célula correta
+    precoVenda: parseFloat(cells[7].querySelector('input').value.replace(',', '.')) || 0
   };
 
   fetch(`http://localhost:8080/api/produtos/${id}`, {
