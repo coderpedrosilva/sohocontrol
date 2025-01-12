@@ -416,67 +416,64 @@ function removerLinhaProdutoQuantidade(elemento) {
   }
 }
 
-document.getElementById('vendaForm').addEventListener('submit', function(e) {
+document.getElementById('vendaForm').addEventListener('submit', function (e) {
   e.preventDefault();
 
   const clienteId = parseInt(document.getElementById('cliente_venda').dataset.clienteId, 10);
-  if (!clienteId) {
-    alert("Cliente não selecionado corretamente.");
-    return;
-  }
-
-  const itens = Array.from(document.querySelectorAll('.produto-quantidade')).map(linha => {
-    const produtoId = parseInt(linha.querySelector('[name="produto_venda"]').dataset.produtoId, 10);
-    const quantidade = parseInt(linha.querySelector('[name="quantidade_venda"]').value) || 0;
-
-    if (!produtoId) {
-      alert("Produto não selecionado corretamente.");
-      throw new Error("Produto não informado ou inválido.");
-    }
-
-    return {
-      produto: { id: produtoId },
-      quantidade: quantidade
-    };
-  });
-
+  const frete = parseFloat(document.getElementById('frete').value.replace(',', '.')) || 0; // Captura o valor do frete
   const valorTotal = parseFloat(document.getElementById('valor_total').value) || 0;
-  const valorParcial = parseFloat(document.getElementById('valor_parcial').value) || 0; // Captura o valor parcial
+  const valorParcial = parseFloat(document.getElementById('valor_parcial').value) || 0;
   const desconto = parseFloat(document.getElementById('desconto').value.replace(',', '.')) || 0;
   const tipoDesconto = document.getElementById('tipo_desconto').value;
 
+  const itens = Array.from(document.querySelectorAll('.produto-quantidade')).map(linha => {
+      const produtoId = parseInt(linha.querySelector('[name="produto_venda"]').dataset.produtoId, 10);
+      const quantidade = parseInt(linha.querySelector('[name="quantidade_venda"]').value) || 0;
+
+      if (!produtoId) {
+          alert("Produto não selecionado corretamente.");
+          throw new Error("Produto não informado ou inválido.");
+      }
+
+      return {
+          produto: { id: produtoId },
+          quantidade: quantidade
+      };
+  });
+
   const venda = {
-    dataVenda: document.getElementById('data_venda').value,
-    cliente: { id: clienteId },
-    itens: itens,
-    valorTotal: valorTotal.toFixed(2),
-    valorParcial: valorParcial.toFixed(2), // Inclui o valor parcial no payload
-    descontoAplicado: parseFloat(desconto.toFixed(2)),
-    tipoDesconto: tipoDesconto
+      dataVenda: document.getElementById('data_venda').value,
+      cliente: { id: clienteId },
+      itens: itens,
+      frete: frete, // Inclui o frete no payload
+      valorTotal: valorTotal.toFixed(2),
+      valorParcial: valorParcial.toFixed(2),
+      descontoAplicado: parseFloat(desconto.toFixed(2)),
+      tipoDesconto: tipoDesconto
   };
 
   fetch('http://localhost:8080/api/vendas', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(venda)
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(venda)
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => { throw new Error(err.error); });
-    }
-    return response.json();
-  })
-  .then(data => {
-    alert("Venda registrada com sucesso!");
-    document.getElementById('vendaForm').reset();
-    document.getElementById('valor_parcial').value = '';
-    document.getElementById('valor_total').value = '';
-    carregarProdutos();
-    carregarVendas();
-  })
-  .catch(error => {
-    alert("Erro ao registrar a venda: " + error.message);
-  });
+      .then(response => {
+          if (!response.ok) {
+              return response.json().then(err => {
+                  throw new Error(err.error);
+              });
+          }
+          return response.json();
+      })
+      .then(() => {
+          alert("Venda registrada com sucesso!");
+          document.getElementById('vendaForm').reset();
+          carregarProdutos();
+          carregarVendas();
+      })
+      .catch(error => {
+          alert("Erro ao registrar a venda: " + error.message);
+      });
 });
 
 // ===================================
@@ -518,23 +515,20 @@ function atualizarValores() {
 
 // Função para calcular o valor total após o desconto (em reais ou percentual)
 function calcularValorTotalComDesconto(valorParcial) {
-  // Converte vírgula para ponto decimal, se necessário
   let descontoStr = document.getElementById('desconto').value.replace(',', '.');
   let desconto = parseFloat(descontoStr) || 0;
   let tipoDesconto = document.getElementById('tipo_desconto').value;
-  let valorTotal = valorParcial;
+  let frete = parseFloat(document.getElementById('frete').value.replace(',', '.')) || 0; // Captura o frete
+  let valorTotal = valorParcial + frete; // Inclui o frete no cálculo
 
-  // Aplica o desconto com base no tipo selecionado (reais ou percentual)
   if (tipoDesconto === 'reais') {
-    valorTotal -= desconto; // Desconto em reais
+      valorTotal -= desconto;
   } else if (tipoDesconto === 'percentual') {
-    valorTotal -= valorParcial * (desconto / 100); // Desconto percentual
+      valorTotal -= valorParcial * (desconto / 100);
   }
 
-  // Garante que o valor total não seja negativo
   valorTotal = Math.max(0, valorTotal);
 
-  // Exibe o valor total na interface
   document.getElementById('valor_total').value = valorTotal.toFixed(2);
 }
 
@@ -564,6 +558,11 @@ document.getElementById('desconto').addEventListener('input', function() {
 });
 
 document.getElementById('tipo_desconto').addEventListener('change', function() {
+  let valorParcial = parseFloat(document.getElementById('valor_parcial').value) || 0;
+  calcularValorTotalComDesconto(valorParcial);
+});
+
+document.getElementById('frete').addEventListener('input', function () {
   let valorParcial = parseFloat(document.getElementById('valor_parcial').value) || 0;
   calcularValorTotalComDesconto(valorParcial);
 });
@@ -619,24 +618,25 @@ function renderizarTabelaVendas() {
   tbody.innerHTML = '';
 
   vendas.forEach(venda => {
-    let row = tbody.insertRow();
-    row.insertCell().innerText = venda.codigoVenda;
-    row.insertCell().innerText = formatarData(venda.dataVenda);
-    row.insertCell().innerText = venda.nomeCliente;
-    row.insertCell().innerText = venda.nomeProdutos;
-    row.insertCell().innerText = venda.quantidades;
-    row.insertCell().innerText = venda.precosVenda;
-    row.insertCell().innerText = venda.valorParcial;
-    row.insertCell().innerText = venda.valorTotal; // Exibe a frase de desconto no fronten
+      let row = tbody.insertRow();
+      row.insertCell().innerText = venda.codigoVenda;
+      row.insertCell().innerText = formatarData(venda.dataVenda);
+      row.insertCell().innerText = venda.nomeCliente;
+      row.insertCell().innerText = venda.nomeProdutos;
+      row.insertCell().innerText = venda.quantidades;
+      row.insertCell().innerText = venda.precosVenda;
+      row.insertCell().innerText = venda.valorParcial;
+      row.insertCell().innerText = venda.frete.toFixed(2); // Exibe o frete
+      row.insertCell().innerText = venda.valorTotal;
 
-    let actionCell = row.insertCell();
-    actionCell.innerHTML = `
-      <div class="icon-container">
-        <i class="fa-solid fa-file-image"></i>
-        <i class="fa-solid fa-file-pdf"></i>
-        <i class="fa-solid fa-trash" onclick="deletarVenda(${venda.codigoVenda}, this.closest('tr'))"></i>
-      </div>
-    `;
+      let actionCell = row.insertCell();
+      actionCell.innerHTML = `
+          <div class="icon-container">
+              <i class="fa-solid fa-file-image"></i>
+              <i class="fa-solid fa-file-pdf"></i>
+              <i class="fa-solid fa-trash" onclick="deletarVenda(${venda.codigoVenda}, this.closest('tr'))"></i>
+          </div>
+      `;
   });
 
   if (!termoBusca) {

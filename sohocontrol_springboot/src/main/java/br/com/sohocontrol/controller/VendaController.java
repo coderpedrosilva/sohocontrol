@@ -50,8 +50,8 @@ public class VendaController {
                 item.setVenda(venda);
             });
 
-            // Ajuste para salvar o valor parcial
-            venda.setValorParcial(venda.getValorParcial());
+            // Recalcular o valor total com frete
+            venda.calcularValorTotal();
 
             vendaRepository.save(venda);
             return ResponseEntity.ok(venda);
@@ -104,6 +104,7 @@ public class VendaController {
         double valorTotal = venda.getValorTotal();
         double descontoAplicado = venda.getDescontoAplicado() != null ? venda.getDescontoAplicado() : 0.0;
         double valorParcial = venda.getValorParcial(); // Obtenção direta do banco de dados
+        double frete = venda.getFrete(); // Novo campo
 
         // Formatação do valor total com desconto
         String valorTotalFormatado = String.format("%.2f", valorTotal).replace(".", ",");
@@ -123,9 +124,10 @@ public class VendaController {
                 venda.getItens().stream().map(item -> String.valueOf(item.getQuantidade())).collect(Collectors.joining(", ")),
                 venda.getItens().stream().map(item -> String.format("%.2f", item.getPrecoVenda()).replace(".", ",")).collect(Collectors.joining(", ")),
                 String.format("%.2f", valorParcial).replace(".", ","),
-                valorTotalFormatado, // Passa o valor total formatado com a frase de desconto
+                valorTotalFormatado, // Valor total formatado
                 descontoAplicado,
-                venda.getTipoDesconto() != null ? venda.getTipoDesconto() : ""
+                venda.getTipoDesconto() != null ? venda.getTipoDesconto() : "",
+                frete // Inclua o valor do frete aqui
         );
     }
 }

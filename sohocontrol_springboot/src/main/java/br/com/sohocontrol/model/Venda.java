@@ -26,9 +26,8 @@ public class Venda {
     private double valorTotal;
     private Double descontoAplicado;
     private String tipoDesconto;
-
-    // Novo campo para valor parcial
     private double valorParcial;
+    private double frete;
 
     // Getters e Setters
     public Long getId() {
@@ -93,5 +92,14 @@ public class Venda {
 
     public void setValorParcial(double valorParcial) {
         this.valorParcial = valorParcial;
+    }
+
+    public double getFrete() { return frete; }
+
+    public void setFrete(double frete) { this.frete = frete; }
+
+    // Ajustar o cálculo do valor total para incluir frete
+    public void calcularValorTotal() {
+        this.valorTotal = (valorParcial - (descontoAplicado != null ? descontoAplicado : 0.0)) + frete;
     }
 }

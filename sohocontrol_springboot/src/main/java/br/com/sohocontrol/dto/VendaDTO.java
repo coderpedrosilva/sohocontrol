@@ -14,11 +14,12 @@ public class VendaDTO {
     private String valorTotal;
     private double descontoAplicado;
     private String tipoDesconto;
+    private double frete;
 
     // Construtor atualizado
     public VendaDTO(Long codigoVenda, LocalDate dataVenda, String nomeCliente, String nomeProdutos,
-                    String quantidades, String precosVenda, String valorParcial,
-                    String valorTotal, double descontoAplicado, String tipoDesconto) {
+                    String quantidades, String precosVenda, String valorParcial, String valorTotal,
+                    double descontoAplicado, String tipoDesconto, double frete) {
         this.codigoVenda = codigoVenda;
         this.dataVenda = dataVenda;
         this.nomeCliente = nomeCliente;
@@ -29,6 +30,7 @@ public class VendaDTO {
         this.valorTotal = valorTotal;
         this.descontoAplicado = descontoAplicado;
         this.tipoDesconto = tipoDesconto;
+        this.frete = frete;
     }
 
     // Getters e Setters
@@ -111,6 +113,10 @@ public class VendaDTO {
     public void setTipoDesconto(String tipoDesconto) {
         this.tipoDesconto = tipoDesconto;
     }
+
+    public double getFrete() { return frete; }
+
+    public void setFrete(double frete) { this.frete = frete; }
 
     @Override
     public String toString() {
