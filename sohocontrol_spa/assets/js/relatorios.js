@@ -59,6 +59,8 @@ function limparGraficos() {
   document.getElementById('totalSales').innerHTML = '';
   document.getElementById('spark1').innerHTML = '';
   document.getElementById('spark2').innerHTML = '';
+  document.getElementById('spark3').innerHTML = '';
+  document.getElementById('spark4').innerHTML = '';
   document.getElementById('bar').innerHTML = '';
   document.getElementById('donut').innerHTML = '';
   document.getElementById('area').innerHTML = '';
@@ -70,24 +72,37 @@ function processarDadosVendas(vendas) {
   let totalVendas = 0;
   let totalDescontos = 0;
   let totalLucro = 0;
+  let totalFrete = 0; // Adicionado para cálculo do frete
+  let totalImposto = 0; // Adicionado para cálculo do imposto
   let lucroPorMes = Array(12).fill(0);
   let produtosVendidos = {};
   let clientesCompraram = {};
 
-  // Calcula os totais de vendas, descontos e lucro
+  // Calcula os totais de vendas, descontos, lucro, frete, custo total e imposto
   vendas.forEach(venda => {
+    console.log('Preços de Compra Original:', venda.precosCompra);
+    // Extração e tratamento de valores
     const valorVenda = typeof venda.valorTotal === 'string' ? parseFloat(venda.valorTotal.replace(',', '.')) : parseFloat(venda.valorTotal || 0);
     const valorParcial = typeof venda.valorParcial === 'string' ? parseFloat(venda.valorParcial.replace(',', '.')) : parseFloat(venda.valorParcial || 0);
     let descontoAplicado = typeof venda.descontoAplicado === 'string' ? parseFloat(venda.descontoAplicado.replace(',', '.')) : parseFloat(venda.descontoAplicado || 0);
+    const valorFrete = typeof venda.frete === 'string' ? parseFloat(venda.frete.replace(',', '.')) : parseFloat(venda.frete || 0);
+    const itensVenda = venda.itens || []; // Garante que `itensVenda` esteja definido
 
     // Se o tipo de desconto for percentual, converte para valor em reais
     if (venda.tipoDesconto === 'percentual') {
       descontoAplicado = valorParcial * (descontoAplicado / 100);
     }
 
-    totalVendas += valorParcial;
+    //totalVendas += valorParcial;
+    totalVendas += valorVenda;
     totalDescontos += descontoAplicado;
-    totalLucro += valorVenda;
+    totalLucro += valorVenda - valorFrete;
+    totalFrete += valorFrete; // Soma o valor do frete
+
+    // Calcula imposto e custo total baseado nos dados do backend
+    if (typeof venda.totalImposto === 'number') {
+      totalImposto += parseFloat(venda.totalImposto || 0); // Total de imposto fornecido pelo backend
+    }
 
     // Ajusta para garantir que o mês esteja correto
     const mes = new Date(venda.dataVenda).getUTCMonth(); // Obtém o mês da venda (0-11)
@@ -107,6 +122,36 @@ function processarDadosVendas(vendas) {
     clientesCompraram[cliente] = (clientesCompraram[cliente] || 0) + 1;
   });
 
+// Calcula o custo total diretamente somando os preços de compra
+let totalPrecoCompra = 0;
+
+for (let i = 0; i < vendas.length; i++) {
+  const precosCompra = vendas[i].precosCompra; // Usa diretamente o valor
+  const quantidades = vendas[i].quantidades || []; // Quantidade de itens no pedido
+  
+  if (Array.isArray(precosCompra) && Array.isArray(quantidades)) {
+    for (let j = 0; j < precosCompra.length; j++) {
+      const precoUnitario = parseFloat(precosCompra[j].replace(',', '.')) || 0;
+      const quantidade = parseInt(quantidades[j], 10) || 1; // Assume 1 se não houver quantidade
+      totalPrecoCompra += precoUnitario * quantidade; // Soma considerando a quantidade
+    }
+  } else if (typeof precosCompra === 'string') {
+    const precoUnitario = parseFloat(precosCompra.replace(',', '.')) || 0;
+    totalPrecoCompra += precoUnitario;
+  } else if (typeof precosCompra === 'number') {
+    totalPrecoCompra += precosCompra;
+  }
+}
+
+const lucroLiquido = totalVendas - totalFrete - totalDescontos - totalImposto - totalPrecoCompra;
+
+console.log("Total de Vendas:", totalVendas);
+console.log("Total de Descontos:", totalDescontos);
+console.log("Total de Frete:", totalFrete);
+console.log("Total de Impostos:", totalImposto);
+console.log("Total de Preço de Compra:", totalPrecoCompra);
+console.log("Lucro Líquido Calculado:", lucroLiquido);
+
   // Organiza os 10 produtos mais vendidos
   const topProdutos = Object.entries(produtosVendidos)
     .sort((a, b) => b[1] - a[1])
@@ -124,14 +169,17 @@ function processarDadosVendas(vendas) {
   const clientesQuantidade = topClientes.map(item => item[1]);
 
   // Renderiza os gráficos com os dados de vendas
-  renderizarGraficos(totalVendas, totalDescontos, totalLucro, lucroPorMes, produtosNomes, produtosQuantidade, clientesNomes, clientesQuantidade);
+  renderizarGraficos(totalVendas, totalDescontos, totalLucro, totalFrete, totalImposto, lucroLiquido, lucroPorMes, produtosNomes, produtosQuantidade, clientesNomes, clientesQuantidade);
 }
 
-// Função para renderizar os gráficos com os dados obtidos
-function renderizarGraficos(totalVendas, totalDescontos, totalLucro, lucroPorMes, produtosNomes, produtosQuantidade, clientesNomes, clientesQuantidade) {
+function renderizarGraficos(totalVendas, totalDescontos, totalLucro, totalFrete, totalImposto, lucroLiquido, lucroPorMes, produtosNomes, produtosQuantidade, clientesNomes, clientesQuantidade) {
+  // Renderiza os box sparkline
   renderSparkline('Total de Vendas', totalVendas, '#totalSales');
   renderSparkline('Total de Descontos', totalDescontos, '#spark1');
-  renderSparkline('Lucro', totalLucro, '#spark2');
+  renderSparkline('Lucro Bruto', totalLucro, '#spark2');
+  renderSparkline('Frete', totalFrete, '#spark3'); 
+  renderSparkline('Imposto', totalImposto, '#spark4'); 
+  renderSparkline('Lucro Líquido', lucroLiquido, '#spark5'); 
 
   renderBarChart('Lucro por Mês', lucroPorMes, '#bar');
   renderDonutChart('Produtos Mais Vendidos', produtosQuantidade, produtosNomes, '#donut');

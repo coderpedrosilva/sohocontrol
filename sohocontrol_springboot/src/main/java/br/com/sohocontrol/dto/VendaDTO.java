@@ -10,16 +10,18 @@ public class VendaDTO {
     private String nomeProdutos;
     private String quantidades;
     private String precosVenda;
-    private String valorParcial; // Novo campo
+    private String valorParcial;
     private String valorTotal;
     private double descontoAplicado;
     private String tipoDesconto;
     private double frete;
+    private String precosCompra;
+    private double totalImposto; // Campo do imposto adicionado novamente
 
-    // Construtor atualizado
     public VendaDTO(Long codigoVenda, LocalDate dataVenda, String nomeCliente, String nomeProdutos,
                     String quantidades, String precosVenda, String valorParcial, String valorTotal,
-                    double descontoAplicado, String tipoDesconto, double frete) {
+                    double descontoAplicado, String tipoDesconto, double frete, String precosCompra,
+                    double totalImposto) { // Adicionado no construtor
         this.codigoVenda = codigoVenda;
         this.dataVenda = dataVenda;
         this.nomeCliente = nomeCliente;
@@ -31,6 +33,8 @@ public class VendaDTO {
         this.descontoAplicado = descontoAplicado;
         this.tipoDesconto = tipoDesconto;
         this.frete = frete;
+        this.precosCompra = precosCompra;
+        this.totalImposto = totalImposto; // Inicializa o campo imposto
     }
 
     // Getters e Setters
@@ -112,6 +116,22 @@ public class VendaDTO {
 
     public void setTipoDesconto(String tipoDesconto) {
         this.tipoDesconto = tipoDesconto;
+    }
+
+    public String getPrecosCompra() {
+        return precosCompra;
+    }
+
+    public void setPrecosCompra(String precosCompra) {
+        this.precosCompra = precosCompra;
+    }
+
+    public double getTotalImposto() {
+        return totalImposto;
+    }
+
+    public void setTotalImposto(double totalImposto) {
+        this.totalImposto = totalImposto;
     }
 
     public double getFrete() { return frete; }

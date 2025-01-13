@@ -1,6 +1,7 @@
 package br.com.sohocontrol.controller;
 
 import br.com.sohocontrol.dto.VendaDTO;
+import br.com.sohocontrol.model.ItemVenda;
 import br.com.sohocontrol.model.Produto;
 import br.com.sohocontrol.model.Venda;
 import br.com.sohocontrol.repository.ProdutoRepository;
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@CrossOrigin(origins = "*") // Permitir todas as origens (ajuste conforme necessário)
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/vendas")
 public class VendaController {
@@ -103,10 +104,27 @@ public class VendaController {
     private VendaDTO mapToVendaDTO(Venda venda) {
         double valorTotal = venda.getValorTotal();
         double descontoAplicado = venda.getDescontoAplicado() != null ? venda.getDescontoAplicado() : 0.0;
-        double valorParcial = venda.getValorParcial(); // Obtenção direta do banco de dados
-        double frete = venda.getFrete(); // Novo campo
+        double valorParcial = venda.getValorParcial();
+        double frete = venda.getFrete();
+        double totalImposto = 0.0;
+        double custoTotal = 0.0;
 
-        // Formatação do valor total com desconto
+        // Extrair preços de compra
+        String precosCompra = venda.getItens().stream()
+                .map(item -> String.format("%.2f", item.getProduto().getPrecoCompra()).replace(".", ","))
+                .collect(Collectors.joining(", "));
+
+        // Calcular imposto e custo total
+        for (ItemVenda item : venda.getItens()) {
+            Produto produto = item.getProduto();
+            int quantidade = item.getQuantidade();
+
+            totalImposto += (produto.getImposto() * quantidade); // Soma o imposto dos produtos
+            custoTotal += (produto.getPrecoCompra() * quantidade); // Soma o custo total
+        }
+
+        double lucroLiquido = valorTotal - (custoTotal + frete + totalImposto);
+
         String valorTotalFormatado = String.format("%.2f", valorTotal).replace(".", ",");
         if (descontoAplicado > 0) {
             if ("reais".equalsIgnoreCase(venda.getTipoDesconto())) {
@@ -124,10 +142,12 @@ public class VendaController {
                 venda.getItens().stream().map(item -> String.valueOf(item.getQuantidade())).collect(Collectors.joining(", ")),
                 venda.getItens().stream().map(item -> String.format("%.2f", item.getPrecoVenda()).replace(".", ",")).collect(Collectors.joining(", ")),
                 String.format("%.2f", valorParcial).replace(".", ","),
-                valorTotalFormatado, // Valor total formatado
+                valorTotalFormatado,
                 descontoAplicado,
                 venda.getTipoDesconto() != null ? venda.getTipoDesconto() : "",
-                frete // Inclua o valor do frete aqui
+                frete,
+                precosCompra,
+                totalImposto // Adicionado no retorno
         );
     }
 }
