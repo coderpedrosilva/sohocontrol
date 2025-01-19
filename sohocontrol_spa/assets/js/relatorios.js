@@ -167,12 +167,12 @@ console.log("Lucro Líquido Calculado:", lucroLiquido);
 
 function renderizarGraficos(totalVendas, totalDescontos, totalLucro, totalFrete, totalImposto, lucroLiquido, lucroPorMes, produtosNomes, produtosQuantidade, clientesNomes, clientesQuantidade) {
   // Renderiza os box sparkline
-  renderSparkline('Total de Vendas', totalVendas, '#totalSales');
+  renderSparkline('Total de Vendas', totalVendas + totalDescontos, '#totalSales');
   renderSparkline('Total de Descontos', totalDescontos, '#spark1');
-  renderSparkline('Lucro Bruto', totalLucro, '#spark2');
+  renderSparkline('*Lucro Bruto', totalLucro - totalImposto, '#spark2');
   renderSparkline('Frete', totalFrete, '#spark3'); 
   renderSparkline('Imposto', totalImposto, '#spark4'); 
-  renderSparkline('Lucro Líquido', lucroLiquido, '#spark5'); 
+  renderSparkline('**Lucro Líquido', lucroLiquido, '#spark5'); 
 
   renderBarChart('Lucro por Mês', lucroPorMes, '#bar');
   renderDonutChart('Produtos Mais Vendidos', produtosQuantidade, produtosNomes, '#donut');

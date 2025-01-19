@@ -18,3 +18,26 @@ color: #0d6efd !important; /* Azul do Bootstrap para aba ativa */
 .nav-tabs .nav-link {
     color: #000 !important; /* Preto para aba inativa */
 }
+
+.lucro-info {
+    font-size: 0.85em; /* Reduz a fonte geral para ser discreta */
+    line-height: 1.2em; /* Reduz o espaçamento entre as linhas */
+    margin: 0;
+    padding: 0;
+  }
+  
+  .lucro-info p {
+    margin: 0;
+    padding: 0;
+  }
+  
+  .lucro-info strong {
+    font-size: 1em; /* Mantém o destaque do "Lucro Bruto" e "Lucro Líquido" */
+    color: #333; /* Cor de destaque */
+  }
+  
+  .lucro-info .descricao {
+    font-size: 0.9em; /* Levemente menor para o texto explicativo */
+    color: #666; /* Cor mais discreta para a descrição */
+  }
+  
