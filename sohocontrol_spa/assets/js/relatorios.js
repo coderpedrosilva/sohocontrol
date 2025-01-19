@@ -126,24 +126,17 @@ function processarDadosVendas(vendas) {
 let totalPrecoCompra = 0;
 
 for (let i = 0; i < vendas.length; i++) {
-  const precosCompra = vendas[i].precosCompra; // Usa diretamente o valor
-  const quantidades = vendas[i].quantidades || []; // Quantidade de itens no pedido
+  const precosCompra = vendas[i].precosCompra.split(', ') || []; // Divide os preços por vírgulas
+  const quantidades = vendas[i].quantidades.split(', ') || []; // Divide as quantidades por vírgulas
   
-  if (Array.isArray(precosCompra) && Array.isArray(quantidades)) {
-    for (let j = 0; j < precosCompra.length; j++) {
-      const precoUnitario = parseFloat(precosCompra[j].replace(',', '.')) || 0;
-      const quantidade = parseInt(quantidades[j], 10) || 1; // Assume 1 se não houver quantidade
-      totalPrecoCompra += precoUnitario * quantidade; // Soma considerando a quantidade
-    }
-  } else if (typeof precosCompra === 'string') {
-    const precoUnitario = parseFloat(precosCompra.replace(',', '.')) || 0;
-    totalPrecoCompra += precoUnitario;
-  } else if (typeof precosCompra === 'number') {
-    totalPrecoCompra += precosCompra;
+  for (let j = 0; j < precosCompra.length; j++) {
+    const precoUnitario = parseFloat(precosCompra[j].replace(',', '.')) || 0;
+    const quantidade = parseInt(quantidades[j], 10) || 1; // Assume 1 se não houver quantidade
+    totalPrecoCompra += precoUnitario * quantidade; // Soma considerando a quantidade
   }
 }
 
-const lucroLiquido = totalVendas - totalFrete - totalDescontos - totalImposto - totalPrecoCompra;
+const lucroLiquido = totalVendas - totalFrete - totalImposto - totalPrecoCompra;
 
 console.log("Total de Vendas:", totalVendas);
 console.log("Total de Descontos:", totalDescontos);
