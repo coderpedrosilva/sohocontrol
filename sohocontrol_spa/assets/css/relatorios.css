@@ -19,6 +19,24 @@ color: #0d6efd !important; /* Azul do Bootstrap para aba ativa */
     color: #000 !important; /* Preto para aba inativa */
 }
 
+#filterMessage {
+  margin: 20px 0;
+  font-size: 14px;
+  text-align: center;
+}
+.alert {
+  padding: 10px 20px;
+  border-radius: 5px;
+}
+.alert-dismissible .close {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  color: inherit;
+  font-size: 20px;
+}
+
 .lucro-info {
     font-size: 0.85em; /* Reduz a fonte geral para ser discreta */
     line-height: 1.2em; /* Reduz o espaçamento entre as linhas */

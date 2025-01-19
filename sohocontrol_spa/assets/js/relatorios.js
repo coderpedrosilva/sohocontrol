@@ -77,16 +77,24 @@ function processarDadosVendas(vendas) {
   let lucroPorMes = Array(12).fill(0);
   let produtosVendidos = {};
   let clientesCompraram = {};
+  let totalPrecoCompra = 0;
 
   // Calcula os totais de vendas, descontos, lucro, frete, custo total e imposto
   vendas.forEach(venda => {
-    console.log('Preços de Compra Original:', venda.precosCompra);
-    // Extração e tratamento de valores
+
+    const produtos = venda.nomeProdutos.split(', ');
+    let quantidades = venda.quantidades.split(', ').map(qtd => parseInt(qtd, 10));
     const valorVenda = typeof venda.valorTotal === 'string' ? parseFloat(venda.valorTotal.replace(',', '.')) : parseFloat(venda.valorTotal || 0);
     const valorParcial = typeof venda.valorParcial === 'string' ? parseFloat(venda.valorParcial.replace(',', '.')) : parseFloat(venda.valorParcial || 0);
     let descontoAplicado = typeof venda.descontoAplicado === 'string' ? parseFloat(venda.descontoAplicado.replace(',', '.')) : parseFloat(venda.descontoAplicado || 0);
     const valorFrete = typeof venda.frete === 'string' ? parseFloat(venda.frete.replace(',', '.')) : parseFloat(venda.frete || 0);
-    const itensVenda = venda.itens || []; // Garante que `itensVenda` esteja definido
+     
+    // Calcule lucro líquido gráfico
+    const lucroLiquidoGrafico = valorVenda - valorFrete - (venda.totalImposto || 0);
+
+    // Ajusta para garantir que o mês esteja correto
+    const mes = new Date(venda.dataVenda).getUTCMonth(); // Obtém o mês da venda (0-11)
+    lucroPorMes[mes] += lucroLiquidoGrafico;
 
     // Se o tipo de desconto for percentual, converte para valor em reais
     if (venda.tipoDesconto === 'percentual') {
@@ -104,14 +112,6 @@ function processarDadosVendas(vendas) {
       totalImposto += parseFloat(venda.totalImposto || 0); // Total de imposto fornecido pelo backend
     }
 
-    // Ajusta para garantir que o mês esteja correto
-    const mes = new Date(venda.dataVenda).getUTCMonth(); // Obtém o mês da venda (0-11)
-    lucroPorMes[mes] += valorVenda;
-
-    // Conta a quantidade de produtos vendidos
-    const produtos = venda.nomeProdutos.split(', ');
-    const quantidades = venda.quantidades.split(', ').map(qtd => parseInt(qtd, 10));
-
     produtos.forEach((produto, index) => {
       const quantidade = quantidades[index] || 0;
       produtosVendidos[produto] = (produtosVendidos[produto] || 0) + quantidade;
@@ -122,28 +122,19 @@ function processarDadosVendas(vendas) {
     clientesCompraram[cliente] = (clientesCompraram[cliente] || 0) + 1;
   });
 
-// Calcula o custo total diretamente somando os preços de compra
-let totalPrecoCompra = 0;
-
-for (let i = 0; i < vendas.length; i++) {
-  const precosCompra = vendas[i].precosCompra.split(', ') || []; // Divide os preços por vírgulas
-  const quantidades = vendas[i].quantidades.split(', ') || []; // Divide as quantidades por vírgulas
-  
-  for (let j = 0; j < precosCompra.length; j++) {
-    const precoUnitario = parseFloat(precosCompra[j].replace(',', '.')) || 0;
-    const quantidade = parseInt(quantidades[j], 10) || 1; // Assume 1 se não houver quantidade
-    totalPrecoCompra += precoUnitario * quantidade; // Soma considerando a quantidade
+  // Calcula o custo total diretamente somando os preços de compra
+  for (let i = 0; i < vendas.length; i++) {
+    precosCompra = vendas[i].precosCompra.split(', ') || []; // Divide os preços por vírgulas
+    quantidades = vendas[i].quantidades.split(', ') || []; // Divide as quantidades por vírgulas
+    
+    for (let j = 0; j < precosCompra.length; j++) {
+      const precoUnitario = parseFloat(precosCompra[j].replace(',', '.')) || 0;
+      const quantidade = parseInt(quantidades[j], 10) || 1; // Assume 1 se não houver quantidade
+      totalPrecoCompra += precoUnitario * quantidade; // Soma considerando a quantidade
+    }
   }
-}
 
 const lucroLiquido = totalVendas - totalFrete - totalImposto - totalPrecoCompra;
-
-console.log("Total de Vendas:", totalVendas);
-console.log("Total de Descontos:", totalDescontos);
-console.log("Total de Frete:", totalFrete);
-console.log("Total de Impostos:", totalImposto);
-console.log("Total de Preço de Compra:", totalPrecoCompra);
-console.log("Lucro Líquido Calculado:", lucroLiquido);
 
   // Organiza os 10 produtos mais vendidos
   const topProdutos = Object.entries(produtosVendidos)
@@ -173,8 +164,7 @@ function renderizarGraficos(totalVendas, totalDescontos, totalLucro, totalFrete,
   renderSparkline('Frete', totalFrete, '#spark3'); 
   renderSparkline('Imposto', totalImposto, '#spark4'); 
   renderSparkline('**Lucro Líquido', lucroLiquido, '#spark5'); 
-
-  renderBarChart('Lucro por Mês', lucroPorMes, '#bar');
+  renderBarChart('Lucro Bruto por Período', lucroPorMes, '#bar');
   renderDonutChart('Produtos Mais Vendidos', produtosQuantidade, produtosNomes, '#donut');
   renderAreaChart('Clientes que Mais Compraram', clientesQuantidade, clientesNomes, '#area');
 
@@ -257,15 +247,31 @@ function renderSparkline(title, data, selector) {
 }
 
 function renderBarChart(title, data, selector) {
+  const formattedData = data.map(value => parseFloat(value.toFixed(2))); // Formata os valores para 2 casas decimais
+
   const options = {
     chart: { type: 'bar', height: 380 },
-    series: [{ name: title, data: data }],
+    series: [{ name: title, data: formattedData }], // Usa os valores formatados
     xaxis: {
       categories: [
         'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 
         'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 
         'Novembro', 'Dezembro'
       ]
+    },
+    yaxis: {
+      labels: {
+        formatter: function(val) {
+          return val.toFixed(2); // Exibe os valores do eixo Y com 2 casas decimais
+        }
+      }
+    },
+    tooltip: {
+      y: {
+        formatter: function(value) {
+          return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+      }
     },
     title: { text: title, align: 'left', style: { fontSize: '18px' } }
   };
@@ -315,3 +321,8 @@ function renderLineChart(title, data, categories, selector) {
   };
   new ApexCharts(document.querySelector(selector), options).render();
 }
+
+// Botão de mensagem do filtro de pesquisa
+document.querySelector('.close').addEventListener('click', function () {
+  document.getElementById('filterMessage').style.display = 'none';
+});

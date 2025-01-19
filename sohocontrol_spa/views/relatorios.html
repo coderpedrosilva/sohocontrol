@@ -38,6 +38,12 @@
   </nav>
 
   <!-- Filtro de Período -->
+  <div id="filterMessage" class="alert alert-info alert-dismissible fade show" role="alert">
+    <strong>Atenção:</strong> Escolha a data inicial e a data final para a pesquisa antes de aplicar o filtro.
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
   <div class="container filter-section">
     <div class="row">
       <div class="col-md-3">
@@ -89,8 +95,8 @@
       </div>
     </div>
     <div class="lucro-info">
-      <p><strong>*Lucro Bruto</strong> = <span class="descricao">Total de vendas - (Descontos + Frete + Imposto)</span></p>
-      <p><strong>**Lucro Líquido</strong> = <span class="descricao">Lucro Bruto - Preço de compra</span></p>
+      <p><strong>*Lucro Bruto</strong> = <span class="descricao">Total de vendas - Descontos - Fretes - Impostos</span></p>
+      <p><strong>**Lucro Líquido</strong> = <span class="descricao">Lucro Bruto - Preços de compra</span></p>
     </div>
     <div class="row mt-5 mb-4">
       <div class="col-md-6">
