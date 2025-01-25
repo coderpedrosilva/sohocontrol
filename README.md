@@ -25,7 +25,7 @@ O sistema é totalmente modular, dividido em quatro áreas principais: **Cliente
 
 ### **2. Controle de Estoque**
 - Cadastro de produtos com informações como:
-  - Nome, Código, Fornecedor, Origem, Descrição, Quantidade, Preço de Compra, Imposto e Preço de Venda.
+  - Código, Fornecedor, Origem, Nome do Produto, Descrição, Quantidade, Preço de Compra, Imposto e Preço de Venda.
 - Edição e exclusão de produtos.
 - Busca de produtos por nome.
 - Paginação de produtos para exibição organizada.
