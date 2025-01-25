@@ -43,6 +43,8 @@ O sistema é totalmente modular, dividido em quatro áreas principais: **Cliente
 - Gráficos e estatísticas detalhados, incluindo:
   - Total de vendas.
   - Total de descontos aplicados.
+  - Frete
+  - Impostos
   - Lucro bruto e líquido.
   - Produtos mais vendidos.
   - Clientes que mais compraram.
@@ -111,30 +113,30 @@ Certifique-se de ter os seguintes softwares instalados:
 ### Passos para Configuração
 
 1. **Clone o Repositório**:
-   \```bash
+   ```bash
    git clone https://github.com/usuario/soho-control.git
    cd soho-control
-   \```
+   ```
 
 2. **Configuração do Banco de Dados**:
    - Crie um banco de dados chamado `soho_control`.
    - Atualize as credenciais no arquivo `application.properties`:
-     \```properties
+     ```properties
      spring.datasource.url=jdbc:mysql://localhost:3306/soho_control \\
      spring.datasource.username=SEU_USUARIO \\
      spring.datasource.password=SUA_SENHA \\
      spring.jpa.hibernate.ddl-auto=update
-     \```
+     ```
 
 3. **Compile o Projeto**:
-   \```bash
+   ```bash
    mvn clean install
-   \```
+   ```
 
 4. **Execute o Backend**:
-   \```bash
+   ```bash
    mvn spring-boot:run
-   \```
+   ```
 
 5. **Configuração do Frontend**:
    - Certifique-se de que os arquivos frontend estão na pasta `src/main/resources/static`.
@@ -149,17 +151,17 @@ Certifique-se de ter os seguintes softwares instalados:
 
 1. Faça um fork do repositório.
 2. Crie uma branch para sua feature:
-   \```bash
+   ```bash
    git checkout -b minha-feature
-   \```
+   ```
 3. Faça commit das suas alterações:
-   \```bash
+   ```bash
    git commit -m "Descrição da alteração"
-   \```
+   ```
 4. Envie para sua branch:
-   \```bash
+   ```bash
    git push origin minha-feature
-   \```
+   ```
 5. Abra um Pull Request no repositório original.
 
 ---
@@ -179,35 +181,35 @@ Se você está começando do zero e deseja configurar o Express.js, siga as inst
 **Passo 1:** Criar um Novo Projeto Node.js
 
 Navegue até o diretório onde deseja criar o projeto:
-\```bash
+```bash
 cd caminho/onde/deseja/criar/o/projeto
-\```
+```
 
 Inicialize um novo projeto Node.js:
-\```bash
+```bash
 npm init -y
-\```
+```
 
 Instale o Express.js:
-\```bash
+```bash
 npm install express
-\```
+```
 
 **Passo 2:** Criar o Servidor Express
 
 No diretório do projeto, crie um arquivo chamado `server.js` e adicione o conteúdo necessário (conforme consta no projeto).
 
 Execute o servidor Express:
-\```bash
+```bash
 node server.js
-\```
+```
 
 Acesse o servidor pelo navegador em `http://localhost:4200`.
 
 Se houver problemas de execução no PowerShell, você pode ajustar a política de execução com:
-\```bash
+```bash
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
-\```
+```
 
 ---
 
@@ -218,16 +220,16 @@ Caso você já tenha o projeto clonado, mas precise reinstalar as dependências 
 **Passo 1:** Navegue até o Diretório do Projeto
 
 Navegue até o diretório onde o projeto foi clonado:
-\```bash
+```bash
 cd caminho/até/o/projeto
-\```
+```
 
 **Passo 2:** Baixar e Reinstalar as Dependências
 
 Baixe a pasta `node_modules` e reinstale todas as dependências listadas no `package.json` com o seguinte comando:
-\```bash
+```bash
 npm install
-\```
+```
 
 **Passo 3:** Verificar o Arquivo `server.js`
 
@@ -236,9 +238,9 @@ Certifique-se de que o arquivo `server.js` está presente no diretório do proje
 **Passo 4:** Executar o Servidor Express
 
 No diretório do projeto, execute o servidor Express:
-\```bash
+```bash
 node server.js
-\```
+```
 
 Acesse o servidor pelo navegador em `http://localhost:4200`.
 
@@ -251,13 +253,13 @@ Você pode usar o Nodemon para substituir o comando `node server.js`. O Nodemon 
 Para usar o Nodemon:
 
 1. Instale o Nodemon globalmente:
-\```bash
+```bash
 npm install -g nodemon
-\```
+```
 
 2. Depois, no diretório do projeto, use o seguinte comando para iniciar o servidor:
-\```bash
+```bash
 nodemon server.js
-\```
+```
 
 Dessa forma, o servidor será automaticamente reiniciado sempre que você modificar o código em `server.js`.
