@@ -127,8 +127,8 @@ Certifique-se de ter os seguintes softwares instalados:
 
 1. **Clone o Repositório**:
    ```bash
-   git clone https://github.com/coderpedrosilva/sohocontrol-source-code
-   cd sohocontrol-source-code
+   git clone https://github.com/coderpedrosilva/sohocontrol
+   cd sohocontrol
    ```
 
 2. **Configuração do Banco de Dados**:
