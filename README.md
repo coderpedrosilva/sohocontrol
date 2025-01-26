@@ -160,7 +160,7 @@ Certifique-se de ter os seguintes softwares instalados:
 5. **Configuração e Execução do Frontend**:
    - Navegue até a pasta do frontend:
    ```bash
-   cd ../sohocontrol_spa
+   cd ../sohocontrol_bootstrap
    ```
 
    - Instale as dependências do projeto:
