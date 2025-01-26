@@ -29,7 +29,7 @@ let vendas = [];
 
 // Função para carregar dados iniciais de clientes e produtos do backend
 function carregarDadosIniciais() {
-  // Requisição para obter a lista de clientes
+  // Requisição para obter a lista de clientesssss
   fetch('http://localhost:8080/api/clientes')
     .then(response => response.json())
     .then(data => {
@@ -617,7 +617,24 @@ function renderizarTabelaVendas() {
   let tbody = document.querySelector('#tabelaVendas tbody');
   tbody.innerHTML = '';
 
-  vendas.forEach(venda => {
+  // Filtra as vendas com base no termo de busca
+  let termoBusca = document.getElementById('buscarVenda').value.toLowerCase();
+  let vendasFiltradas = vendas.filter(venda => {
+      return (
+          venda.nomeCliente.toLowerCase().includes(termoBusca) ||
+          venda.nomeProdutos.toLowerCase().includes(termoBusca)
+      );
+  });
+
+  // Cálculo dos índices de início e fim com base na página atual
+  let inicio = (paginaAtualVendas - 1) * vendasPorPagina;
+  let fim = inicio + vendasPorPagina;
+
+  // Obtem apenas as vendas da página atual
+  let vendasPaginadas = vendasFiltradas.slice(inicio, fim);
+
+  // Adiciona cada venda à tabela
+  vendasPaginadas.forEach(venda => {
       let row = tbody.insertRow();
       row.insertCell().innerText = venda.codigoVenda;
       row.insertCell().innerText = formatarData(venda.dataVenda);
@@ -626,7 +643,7 @@ function renderizarTabelaVendas() {
       row.insertCell().innerText = venda.quantidades;
       row.insertCell().innerText = venda.precosVenda;
       row.insertCell().innerText = venda.valorParcial;
-      row.insertCell().innerText = venda.frete.toFixed(2); // Exibe o frete
+      row.insertCell().innerText = venda.frete.toFixed(2);
       row.insertCell().innerText = venda.valorTotal;
 
       let actionCell = row.insertCell();
@@ -639,9 +656,8 @@ function renderizarTabelaVendas() {
       `;
   });
 
-  if (!termoBusca) {
-    renderizarPaginacaoVendas();
-  }
+  // Atualiza a paginação
+  renderizarPaginacaoVendas(vendasFiltradas.length);
 }
 
 // Função de busca ajustada para permitir busca global
@@ -652,33 +668,33 @@ document.getElementById('buscarVenda').addEventListener('input', function() {
 
 // Renderiza os botões de paginação da tabela de vendas
 function renderizarPaginacaoVendas() {
-  let totalPaginas = Math.ceil(vendas.length / vendasPorPagina);
+  let totalPaginas = Math.ceil(vendas.length / vendasPorPagina); // Calcula o total de páginas
   let pagination = document.getElementById('paginationVendas');
   pagination.innerHTML = ''; // Limpa a paginação antes de renderizar
 
-  let maxPaginasVisiveis = 3; // Limita a quantidade de páginas exibidas
-  let inicioPagina = Math.max(1, paginaAtualVendas - 1);
-  let fimPagina = Math.min(totalPaginas, inicioPagina + maxPaginasVisiveis - 1);
+  let maxPaginasVisiveis = 3; // Número máximo de páginas visíveis
+  let inicioPagina = Math.max(1, paginaAtualVendas - 1); // Início do intervalo visível
+  let fimPagina = Math.min(totalPaginas, inicioPagina + maxPaginasVisiveis - 1); // Fim do intervalo visível
 
-  // Botão "Anterior" para navegação entre páginas
+  // Botão "Anterior"
   let anteriorLi = document.createElement('li');
   anteriorLi.classList.add('page-item');
-  if (paginaAtualVendas === 1) anteriorLi.classList.add('disabled');
+  if (paginaAtualVendas === 1) anteriorLi.classList.add('disabled'); // Desativa o botão se na primeira página
   anteriorLi.innerHTML = `<a class="page-link" href="#">Anterior</a>`;
   anteriorLi.onclick = (e) => {
     e.preventDefault();
     if (paginaAtualVendas > 1) {
-      paginaAtualVendas--;
-      renderizarTabelaVendas(); // Atualiza a tabela de vendas após a mudança de página
+      paginaAtualVendas--; // Retrocede uma página
+      renderizarTabelaVendas(); // Atualiza a tabela
     }
   };
-  pagination.appendChild(anteriorLi);
+  pagination.appendChild(anteriorLi); // Adiciona o botão "Anterior"
 
-  // Renderiza os números das páginas para navegação
+  // Botões de páginas visíveis
   for (let i = inicioPagina; i <= fimPagina; i++) {
     let li = document.createElement('li');
     li.classList.add('page-item');
-    if (i === paginaAtualVendas) li.classList.add('active');
+    if (i === paginaAtualVendas) li.classList.add('active'); // Marca a página atual
 
     let a = document.createElement('a');
     a.classList.add('page-link');
@@ -686,27 +702,27 @@ function renderizarPaginacaoVendas() {
     a.innerText = i;
     a.onclick = (e) => {
       e.preventDefault();
-      paginaAtualVendas = i;
-      renderizarTabelaVendas(); // Atualiza a tabela de vendas após a seleção da página
+      paginaAtualVendas = i; // Define a página atual
+      renderizarTabelaVendas(); // Atualiza a tabela
     };
 
     li.appendChild(a);
-    pagination.appendChild(li);
+    pagination.appendChild(li); // Adiciona os botões de número de página
   }
 
-  // Botão "Próxima" para navegação entre páginas
+  // Botão "Próxima"
   let proximaLi = document.createElement('li');
   proximaLi.classList.add('page-item');
-  if (paginaAtualVendas === totalPaginas) proximaLi.classList.add('disabled');
+  if (paginaAtualVendas === totalPaginas) proximaLi.classList.add('disabled'); // Desativa o botão se na última página
   proximaLi.innerHTML = `<a class="page-link" href="#">Próxima</a>`;
   proximaLi.onclick = (e) => {
     e.preventDefault();
     if (paginaAtualVendas < totalPaginas) {
-      paginaAtualVendas++;
-      renderizarTabelaVendas(); // Atualiza a tabela de vendas após a mudança de página
+      paginaAtualVendas++; // Avança uma página
+      renderizarTabelaVendas(); // Atualiza a tabela
     }
   };
-  pagination.appendChild(proximaLi);
+  pagination.appendChild(proximaLi); // Adiciona o botão "Próxima"
 }
 
 // ===================================
