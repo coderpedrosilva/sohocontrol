@@ -23,12 +23,18 @@ O sistema é totalmente modular, dividido em quatro áreas principais: **Cliente
 - Busca de clientes por nome.
 - Paginação de clientes para exibição eficiente.
 
+![Clientes](readme-img/clientes-1.png)
+![Clientes](readme-img/clientes-2.png)
+
 ### **2. Controle de Estoque**
 - Cadastro de produtos com informações como:
   - Código, Fornecedor, Origem, Nome do Produto, Descrição, Quantidade, Preço de Compra, Imposto e Preço de Venda.
 - Edição e exclusão de produtos.
 - Busca de produtos por nome.
 - Paginação de produtos para exibição organizada.
+
+![Estoque](readme-img/estoque-1.png)
+![Estoque](readme-img/estoque-2.png)
 
 ### **3. Registro de Vendas**
 - Registro de vendas, incluindo:
@@ -38,6 +44,9 @@ O sistema é totalmente modular, dividido em quatro áreas principais: **Cliente
 - Edição e exclusão de vendas.
 - Busca de vendas por cliente ou produto.
 - Visualização de vendas com paginação.
+
+![Vendas](readme-img/vendas-1.png)
+![vendas](readme-img/vendas-2.png)
 
 ### **4. Relatórios**
 - Gráficos e estatísticas detalhados, incluindo:
@@ -50,6 +59,8 @@ O sistema é totalmente modular, dividido em quatro áreas principais: **Cliente
   - Clientes que mais compraram.
   - Estoque dos produtos mais vendidos.
 - Filtros por período (data inicial e final).
+
+![Relatorio](readme-img/relatorio.png)
 
 ---
 
