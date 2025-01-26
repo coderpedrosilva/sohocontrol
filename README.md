@@ -23,8 +23,8 @@ O sistema é totalmente modular, dividido em quatro áreas principais: **Cliente
 - Busca de clientes por nome.
 - Paginação de clientes para exibição eficiente.
 
-![Clientes](readme-img/clientes-1.png)
-![Clientes](readme-img/clientes-2.png)
+![Clientes](readme_img/clientes-1.png)
+![Clientes](readme_img/clientes-2.png)
 
 ### **2. Controle de Estoque**
 - Cadastro de produtos com informações como:
@@ -33,8 +33,8 @@ O sistema é totalmente modular, dividido em quatro áreas principais: **Cliente
 - Busca de produtos por nome.
 - Paginação de produtos para exibição organizada.
 
-![Estoque](readme-img/estoque-1.png)
-![Estoque](readme-img/estoque-2.png)
+![Estoque](readme_img/estoque-1.png)
+![Estoque](readme_img/estoque-2.png)
 
 ### **3. Registro de Vendas**
 - Registro de vendas, incluindo:
@@ -46,9 +46,9 @@ O sistema é totalmente modular, dividido em quatro áreas principais: **Cliente
 - Visualização de vendas com paginação.
 - Geração de PDF e PNG com descritivo da venda
 
-![Vendas](readme-img/vendas-1.png)
-![vendas](readme-img/vendas-2.png)
-![PDF](readme-img/pdf.png)
+![Vendas](readme_img/vendas-1.png)
+![vendas](readme_img/vendas-2.png)
+![PDF](readme_img/pdf.png)
 
 ### **4. Relatórios**
 - Gráficos e estatísticas detalhados, incluindo:
@@ -62,7 +62,7 @@ O sistema é totalmente modular, dividido em quatro áreas principais: **Cliente
   - Estoque dos produtos mais vendidos.
 - Filtros por período (data inicial e final).
 
-![Relatorio](readme-img/relatorio.png)
+![Relatorio](readme_img/relatorio.png)
 
 ---
 
