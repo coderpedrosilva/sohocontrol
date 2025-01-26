@@ -126,18 +126,6 @@ public class VendaController {
         // Calcular lucro líquido
         double lucroLiquido = valorTotal - (custoTotal + frete + totalImposto);
 
-        // Adicionando logs para verificar os valores
-        System.out.println("========== LOG DO BACKEND ==========");
-        System.out.println("Código da Venda: " + venda.getId());
-        System.out.println("Valor Total: " + valorTotal);
-        System.out.println("Desconto Aplicado: " + descontoAplicado);
-        System.out.println("Valor Parcial: " + valorParcial);
-        System.out.println("Frete: " + frete);
-        System.out.println("Total de Impostos: " + totalImposto);
-        System.out.println("Custo Total: " + custoTotal);
-        System.out.println("Lucro Líquido Calculado: " + lucroLiquido);
-        System.out.println("====================================");
-
         // Formatar o valor total com informações sobre desconto
         String valorTotalFormatado = String.format("%.2f", valorTotal).replace(".", ",");
         if (descontoAplicado > 0) {
