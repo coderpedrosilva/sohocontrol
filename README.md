@@ -114,22 +114,28 @@ Certifique-se de ter os seguintes softwares instalados:
 
 1. **Clone o Repositório**:
    ```bash
-   git clone https://github.com/usuario/soho-control.git
-   cd soho-control
+   git clone https://github.com/coderpedrosilva/sohocontrol-source-code
+   cd sohocontrol-source-code
    ```
 
 2. **Configuração do Banco de Dados**:
    - Crie um banco de dados chamado `soho_control`.
    - Atualize as credenciais no arquivo `application.properties`:
-     ```properties
-     spring.datasource.url=jdbc:mysql://localhost:3306/soho_control \\
-     spring.datasource.username=SEU_USUARIO \\
-     spring.datasource.password=SUA_SENHA \\
-     spring.jpa.hibernate.ddl-auto=update
-     ```
+   ```properties
+   spring.application.name=sohocontrol 
+   spring.datasource.url=jdbc:mysql://localhost:3306/soho_control
+   spring.datasource.username=SEU_USUARIO
+   spring.datasource.password=SUA_SENHA
+   spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+   
+   spring.jpa.hibernate.ddl-auto=update
+   spring.jpa.show-sql=true
+   spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+   ```
 
-3. **Compile o Projeto**:
+3. **Compile o Projeto (Backend)**:
    ```bash
+   cd sohocontrol_springboot
    mvn clean install
    ```
 
@@ -138,12 +144,25 @@ Certifique-se de ter os seguintes softwares instalados:
    mvn spring-boot:run
    ```
 
-5. **Configuração do Frontend**:
-   - Certifique-se de que os arquivos frontend estão na pasta `src/main/resources/static`.
-   - Ajuste os caminhos para acessar as APIs no arquivo `clientes.js`, `produtos.js`, etc., se necessário.
+5. **Configuração e Execução do Frontend**:
+   - Navegue até a pasta do frontend:
+   ```bash
+   cd ../sohocontrol_spa
+   ```
+
+   - Instale as dependências do projeto:
+   ```bash
+   npm install
+   ```
+
+   - Execute o servidor do frontend:
+   ```bash
+   node server.js
+   ```
 
 6. **Acesse o Sistema**:
-   - Abra o navegador e vá para `http://localhost:8080`.
+   - O **Frontend** estará disponível em `http://localhost:4200`.
+   - O **Backend** estará disponível em `http://localhost:8080`.
 
 ---
 
