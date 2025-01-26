@@ -2,7 +2,7 @@
 
 ## Descrição do Projeto
 
-**Soho Control** é um sistema de gerenciamento original criado por mim, que permite realizar controle de clientes, estoque, vendas e relatórios de forma prática e eficiente. O sistema é voltado para pequenos e médios negócios que buscam organizar suas operações e aumentar a produtividade.
+**Soho Control** é um sistema de gerenciamento original criado por mim, que permite realizar controle de clientes, estoque, vendas e relatórios de forma prática e eficiente. O sistema é voltado para pequenos negócios que buscam organizar suas operações e aumentar a produtividade.
 
 Com Soho Control, é possível:
 - Gerenciar informações de clientes.
