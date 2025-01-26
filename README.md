@@ -48,6 +48,7 @@ O sistema é totalmente modular, dividido em quatro áreas principais: **Cliente
 
 ![Vendas](readme-img/vendas-1.png)
 ![vendas](readme-img/vendas-2.png)
+![PDF](readme-img/pdf.png)
 
 ### **4. Relatórios**
 - Gráficos e estatísticas detalhados, incluindo:
