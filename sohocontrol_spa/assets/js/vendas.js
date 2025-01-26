@@ -468,6 +468,7 @@ document.getElementById('vendaForm').addEventListener('submit', function (e) {
       .then(() => {
           alert("Venda registrada com sucesso!");
           document.getElementById('vendaForm').reset();
+          limparFormularioVenda();
           carregarProdutos();
           carregarVendas();
       })
@@ -475,6 +476,35 @@ document.getElementById('vendaForm').addEventListener('submit', function (e) {
           alert("Erro ao registrar a venda: " + error.message);
       });
 });
+
+function limparFormularioVenda() {
+  const vendaForm = document.getElementById('vendaForm');
+
+  // Limpa todos os campos do formulário
+  vendaForm.reset();
+
+  // Limpa o campo de cliente
+  document.getElementById('cliente_venda').value = '';
+  document.getElementById('cliente_venda').dataset.clienteId = '';
+
+  // Remove todas as linhas de produtos, exceto a primeira
+  const produtoContainer = document.getElementById('produto-quantidade-container');
+  const primeiraLinha = produtoContainer.querySelector('.produto-quantidade');
+  produtoContainer.innerHTML = ''; // Remove todas as linhas
+  produtoContainer.appendChild(primeiraLinha); // Adiciona a primeira linha de volta
+
+  // Limpa os datasets da primeira linha
+  primeiraLinha.querySelector('[name="produto_venda"]').value = '';
+  primeiraLinha.querySelector('[name="produto_venda"]').dataset.produtoId = '';
+  primeiraLinha.querySelector('[name="produto_venda"]').dataset.preco = '';
+  primeiraLinha.querySelector('[name="quantidade_venda"]').value = '';
+
+  // Limpa os valores de cálculo
+  document.getElementById('valor_parcial').value = '';
+  document.getElementById('valor_total').value = '';
+  document.getElementById('frete').value = '';
+  document.getElementById('desconto').value = '';
+}
 
 // ===================================
 // FUNÇÕES DE VALIDAÇÃO E CÁLCULO
@@ -522,14 +552,14 @@ function calcularValorTotalComDesconto(valorParcial) {
   let valorTotal = valorParcial + frete; // Inclui o frete no cálculo
 
   if (tipoDesconto === 'reais') {
-      valorTotal -= desconto;
+      valorTotal -= desconto; // Subtrai o desconto em reais diretamente
   } else if (tipoDesconto === 'percentual') {
-      valorTotal -= valorParcial * (desconto / 100);
+      valorTotal -= valorParcial * (desconto / 100); // Calcula a porcentagem corretamente
   }
 
-  valorTotal = Math.max(0, valorTotal);
+  valorTotal = Math.max(0, valorTotal); // Garante que o valor total não seja negativo
 
-  document.getElementById('valor_total').value = valorTotal.toFixed(2);
+  document.getElementById('valor_total').value = valorTotal.toFixed(2); // Atualiza o campo na interface
 }
 
 // Função para validar o campo de desconto, permitindo apenas números e vírgula
@@ -643,14 +673,18 @@ function renderizarTabelaVendas() {
       row.insertCell().innerText = venda.quantidades;
       row.insertCell().innerText = venda.precosVenda;
       row.insertCell().innerText = venda.valorParcial;
-      row.insertCell().innerText = venda.frete.toFixed(2);
+      
+      // Formata o valor do frete com vírgula em vez de ponto
+      let freteFormatado = venda.frete.toFixed(2).replace('.', ',');
+      row.insertCell().innerText = `R$ ${freteFormatado}`;
+      
       row.insertCell().innerText = venda.valorTotal;
 
       let actionCell = row.insertCell();
       actionCell.innerHTML = `
           <div class="icon-container">
-              <i class="fa-solid fa-file-image"></i>
-              <i class="fa-solid fa-file-pdf"></i>
+              <i class="fa-solid fa-file-image" onclick="gerarPNGVenda(this.closest('tr'))"></i>
+              <i class="fa-solid fa-file-pdf" onclick="gerarPDFVenda(this.closest('tr'))"></i>
               <i class="fa-solid fa-trash" onclick="deletarVenda(${venda.codigoVenda}, this.closest('tr'))"></i>
           </div>
       `;
@@ -726,6 +760,190 @@ function renderizarPaginacaoVendas() {
 }
 
 // ===================================
+// GERAÇÃO DE PNG
+// ===================================
+
+function gerarPNGVenda(linha) {
+  // Obtenha os dados da linha clicada
+  const dadosVenda = Array.from(linha.cells).map(cell => cell.innerText);
+
+  // Criação de um elemento temporário para renderizar os dados
+  const container = document.createElement("div");
+  container.style.position = "absolute";
+  container.style.top = "-9999px";
+  container.style.left = "-9999px";
+  container.style.width = "800px";
+  container.style.fontFamily = "Helvetica, Arial, sans-serif";
+  container.style.fontSize = "14px";
+  container.style.lineHeight = "1.5";
+  container.style.padding = "20px";
+  container.style.border = "1px solid #ddd";
+  container.style.backgroundColor = "#fff";
+
+  // Adicione o título principal
+  const title = document.createElement("h2");
+  title.textContent = "Descrição de Venda";
+  title.style.textAlign = "center";
+  title.style.marginBottom = "20px";
+  title.style.fontSize = "18px";
+  title.style.fontWeight = "bold";
+  container.appendChild(title);
+
+  // Adicione uma linha de divisão
+  const divider = document.createElement("hr");
+  divider.style.border = "0";
+  divider.style.borderTop = "1px solid #ddd";
+  container.appendChild(divider);
+
+  // Combine produtos, preços e quantidades
+  const produtos = dadosVenda[3].split(", ");
+  const quantidades = dadosVenda[4].split(", ");
+  const precos = dadosVenda[5].split(", ");
+  const produtosComDetalhes = produtos
+    .map((produto, index) => `${produto} (R$ ${precos[index]}) x ${quantidades[index]}`)
+    .join(", ");
+
+  // Dados fixos da venda
+  const campos = [
+    { titulo: "Código de Venda", valor: dadosVenda[0] },
+    { titulo: "Data", valor: dadosVenda[1] },
+    { titulo: "Cliente", valor: dadosVenda[2] },
+    { titulo: "Produto(s)", valor: produtosComDetalhes },
+    { titulo: "Valor Parcial da Venda (R$)", valor: dadosVenda[6] },
+    { titulo: "Frete (R$)", valor: dadosVenda[7].replace(".", ",") }, // Formata o frete com vírgula
+    { titulo: "Valor Total da Venda (R$)", valor: dadosVenda[8] },
+  ];
+
+  // Renderizar os campos no container
+  campos.forEach((campo) => {
+    const fieldContainer = document.createElement("div");
+    fieldContainer.style.marginBottom = "10px";
+
+    const fieldTitle = document.createElement("strong");
+    fieldTitle.textContent = `${campo.titulo}: `;
+    fieldContainer.appendChild(fieldTitle);
+
+    const fieldValue = document.createElement("span");
+    fieldValue.textContent = campo.valor;
+    fieldContainer.appendChild(fieldValue);
+
+    container.appendChild(fieldContainer);
+  });
+
+  // Adicione uma nota de rodapé
+  const footerNote = document.createElement("p");
+  footerNote.textContent = "Nota: O desconto informado acima não é aplicado ao frete.";
+  footerNote.style.fontStyle = "italic";
+  footerNote.style.fontSize = "12px";
+  footerNote.style.marginTop = "20px";
+  container.appendChild(footerNote);
+
+  // Adicione uma mensagem final de agradecimento
+  const thankYou = document.createElement("p");
+  thankYou.textContent = "Obrigado!";
+  thankYou.style.textAlign = "center";
+  thankYou.style.fontWeight = "bold";
+  thankYou.style.marginTop = "20px";
+  container.appendChild(thankYou);
+
+  document.body.appendChild(container);
+
+  // Use html2canvas para capturar o container como uma imagem
+  html2canvas(container).then((canvas) => {
+    const link = document.createElement("a");
+    link.href = canvas.toDataURL("image/png");
+    link.download = `venda-${dadosVenda[0]}.png`;
+    link.click();
+
+    // Remova o container temporário
+    document.body.removeChild(container);
+  });
+}
+
+// ===================================
+// GERAÇÃO DE PDF
+// ===================================
+
+function gerarPDFVenda(linha) {
+  // Obtenha os dados da linha clicada
+  const dadosVenda = Array.from(linha.cells).map(cell => cell.innerText);
+
+  // Configure o jsPDF
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  // Adicione o título principal com formatação elegante
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(18);
+  doc.text("Descrição de Venda", 105, 20, { align: "center" });
+
+  // Adicione uma linha de divisão após o título
+  doc.setLineWidth(0.5);
+  doc.line(10, 25, 200, 25);
+
+  // Combine produtos, preços e quantidades
+  const produtos = dadosVenda[3].split(", ");
+  const quantidades = dadosVenda[4].split(", ");
+  const precos = dadosVenda[5].split(", ");
+
+  const produtosComDetalhes = produtos.map((produto, index) => 
+      `${produto} (R$ ${precos[index]}) x ${quantidades[index]}`
+  ).join(", ");
+
+  // Configuração de posição inicial
+  let posY = 35;
+
+  // Dados fixos da venda
+  const campos = [
+      { titulo: "Código de Venda", valor: dadosVenda[0] },
+      { titulo: "Data", valor: dadosVenda[1] },
+      { titulo: "Cliente", valor: dadosVenda[2] },
+      { titulo: "Produto(s)", valor: produtosComDetalhes },
+      { titulo: "Valor Parcial da Venda (R$)", valor: dadosVenda[6] },
+      { titulo: "Frete (R$)", valor: dadosVenda[7] },
+      { titulo: "Valor Total da Venda (R$)", valor: dadosVenda[8] },
+  ];
+
+  // Itera sobre os campos e adiciona os dados ao PDF
+  campos.forEach((campo) => {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+
+      // Adiciona o título
+      doc.text(`${campo.titulo}:`, 10, posY);
+
+      // Adiciona o valor com quebra de linha automática para campos longos
+      const valorX = 80; // Posição horizontal para os valores
+      const larguraMax = 120; // Largura máxima para quebra de texto
+      const linhas = doc.splitTextToSize(campo.valor, larguraMax);
+      doc.setFont("helvetica", "bold");
+      linhas.forEach((linha, index) => {
+          doc.text(linha, valorX, posY + index * 8);
+      });
+
+      // Ajusta a posição vertical (altura) com base no número de linhas
+      posY += linhas.length * 10;
+  });
+
+  // Adicione uma linha de observação ao final do PDF
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(10);
+  doc.text(
+      "Nota: O desconto informado acima não é aplicado ao frete.",
+      10,
+      posY + 10
+  );
+
+  // Adicione uma mensagem final de agradecimento
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.text("Obrigado!", 105, posY + 25, { align: "center" });
+
+  // Baixe o arquivo PDF
+  doc.save(`venda-${dadosVenda[0]}.pdf`);
+}
+
+// ===================================
 // EVENTOS DE INICIALIZAÇÃO
 // ===================================
 
@@ -738,3 +956,5 @@ document.addEventListener('DOMContentLoaded', function() {
   carregarVendas(); // Carrega e exibe as vendas na tabela
   carregarDadosBusca(); // Inicializa o autocomplete para busca de clientes e produtos
 });
+
+

@@ -100,6 +100,16 @@ public class Venda {
 
     // Ajustar o cálculo do valor total para incluir frete
     public void calcularValorTotal() {
-        this.valorTotal = (valorParcial - (descontoAplicado != null ? descontoAplicado : 0.0)) + frete;
+        if ("reais".equalsIgnoreCase(tipoDesconto)) {
+            this.valorTotal = (valorParcial - (descontoAplicado != null ? descontoAplicado : 0.0)) + frete;
+        } else if ("percentual".equalsIgnoreCase(tipoDesconto)) {
+            double descontoPercentual = (descontoAplicado != null ? (valorParcial * (descontoAplicado / 100)) : 0.0);
+            this.valorTotal = (valorParcial - descontoPercentual) + frete;
+        } else {
+            this.valorTotal = valorParcial + frete; // Caso não tenha desconto
+        }
+
+        // Garante que o valor total nunca seja negativo
+        this.valorTotal = Math.max(0, this.valorTotal);
     }
 }
