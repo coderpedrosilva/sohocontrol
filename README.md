@@ -44,6 +44,7 @@ O sistema é totalmente modular, dividido em quatro áreas principais: **Cliente
 - Edição e exclusão de vendas.
 - Busca de vendas por cliente ou produto.
 - Visualização de vendas com paginação.
+- Geração de PDF e PNG com descritivo da venda
 
 ![Vendas](readme-img/vendas-1.png)
 ![vendas](readme-img/vendas-2.png)
