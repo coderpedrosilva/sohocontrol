@@ -137,13 +137,15 @@ Certifique-se de ter os seguintes softwares instalados:
    ```
 
 3. **Compile o Projeto (Backend)**:
-   ```bash
+   - Navegue até a pasta do backend:
+   ```bash 
    cd sohocontrol_springboot
-   mvn clean install
    ```
 
 4. **Execute o Backend**:
+   - Execute esses dois comandos:
    ```bash
+   mvn clean install
    mvn spring-boot:run
    ```
 
@@ -164,8 +166,7 @@ Certifique-se de ter os seguintes softwares instalados:
    ```
 
 6. **Acesse o Sistema**:
-   - O **Frontend** estará disponível em `http://localhost:4200`.
-   - O **Backend** estará disponível em `http://localhost:8080`.
+   - O **Tela de acesso** estará disponível em `http://localhost:4200`.
 
 ---
 
