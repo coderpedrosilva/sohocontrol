@@ -111,17 +111,20 @@ Certifique-se de ter os seguintes softwares instalados:
 - **Java 17** ou superior.
 - **Maven** para gerenciar dependências.
 - **MySQL** como banco de dados.
-- **Node.js** (opcional, para gerenciar dependências do frontend).
+- **Node.js** para gerenciar dependências do frontend.
 
 ### Passos para Configuração
 
-1. **Clone o Repositório**:
+1. **Baixar o Projeto no GitHub**:
+   - Acesse o repositório: [Soho Control](https://github.com/coderpedrosilva/sohocontrol)
+   - Clique no botão **Code** e selecione **Download ZIP**.
+   - Extraia o conteúdo do arquivo ZIP para um diretório de sua preferência.
+   - Navegue até a pasta do projeto:
    ```bash
-   git clone https://github.com/coderpedrosilva/sohocontrol
    cd sohocontrol
    ```
 
-2. **Configuração do Banco de Dados**:
+2. **Configuração do Banco de Dados MySQL**:
    - Crie um banco de dados chamado `soho_control`.
    - Atualize as credenciais no arquivo `application.properties`:
    ```properties
@@ -197,7 +200,7 @@ Para mais detalhes visite [Apache License 2.0](https://www.apache.org/licenses/L
 
 ---
 
-# Instalação do Express
+# Outras instalações
 
 ### 1. Instalação do Express.js do Zero
 
