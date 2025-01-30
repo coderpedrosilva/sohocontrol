@@ -90,6 +90,7 @@ O sistema utiliza um banco de dados relacional, como **MySQL**, para armazenar a
   - HTML5, CSS3, JavaScript.
   - Bootstrap.
   - ApexCharts.
+  - Express.js.
 
 - **Backend**:
   - Java 17.
@@ -108,6 +109,7 @@ O sistema utiliza um banco de dados relacional, como **MySQL**, para armazenar a
 
 ### Pré-requisitos
 Certifique-se de ter os seguintes softwares instalados:
+- **Express.js** como servidor do frontend.
 - **Java 17** ou superior.
 - **Maven** para gerenciar dependências.
 - **MySQL** como banco de dados.
