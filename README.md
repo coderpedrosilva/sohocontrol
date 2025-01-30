@@ -109,12 +109,12 @@ O sistema utiliza um banco de dados relacional, como **MySQL**, para armazenar a
 
 ### Pré-requisitos
 Certifique-se de ter os seguintes softwares instalados:
-- **Express.js** como servidor do frontend.
 - **Java 17** ou superior.
 - **Maven** para gerenciar dependências.
 - **MySQL** como banco de dados.
 - **Node.js** para gerenciar dependências do frontend.
-
+- **Express.js** como servidor do frontend.
+- 
 ### Passos para Configuração
 
 1. **Baixar o Projeto no GitHub**:
@@ -199,97 +199,3 @@ Certifique-se de ter os seguintes softwares instalados:
 Este projeto é licenciado sob a **Apache License 2.0**, permitindo uso, modificação, distribuição e venda do software. Atribuição ao autor original é obrigatória, e a licença inclui proteção contra disputas de patentes.
 
 Para mais detalhes visite [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
-
----
-
-# Outras instalações
-
-### 1. Instalação do Express.js do Zero
-
-Se você está começando do zero e deseja configurar o Express.js, siga as instruções abaixo.
-
-**Passo 1:** Criar um Novo Projeto Node.js
-
-Navegue até o diretório onde deseja criar o projeto:
-```bash
-cd caminho/onde/deseja/criar/o/projeto
-```
-
-Inicialize um novo projeto Node.js:
-```bash
-npm init -y
-```
-
-Instale o Express.js:
-```bash
-npm install express
-```
-
-**Passo 2:** Criar o Servidor Express
-
-No diretório do projeto, crie um arquivo chamado `server.js` e adicione o conteúdo necessário (conforme consta no projeto).
-
-Execute o servidor Express:
-```bash
-node server.js
-```
-
-Acesse o servidor pelo navegador em `http://localhost:4200`.
-
-Se houver problemas de execução no PowerShell, você pode ajustar a política de execução com:
-```bash
-Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
-```
-
----
-
-### 2. Reinstalação das Dependências do Projeto com Express.js
-
-Caso você já tenha o projeto clonado, mas precise reinstalar as dependências que não foram incluídas no repositório devido ao `.gitignore`, siga estas etapas.
-
-**Passo 1:** Navegue até o Diretório do Projeto
-
-Navegue até o diretório onde o projeto foi clonado:
-```bash
-cd caminho/até/o/projeto
-```
-
-**Passo 2:** Baixar e Reinstalar as Dependências
-
-Baixe a pasta `node_modules` e reinstale todas as dependências listadas no `package.json` com o seguinte comando:
-```bash
-npm install
-```
-
-**Passo 3:** Verificar o Arquivo `server.js`
-
-Certifique-se de que o arquivo `server.js` está presente no diretório do projeto.
-
-**Passo 4:** Executar o Servidor Express
-
-No diretório do projeto, execute o servidor Express:
-```bash
-node server.js
-```
-
-Acesse o servidor pelo navegador em `http://localhost:4200`.
-
----
-
-### 3. Para Usar o Nodemon
-
-Você pode usar o Nodemon para substituir o comando `node server.js`. O Nodemon reinicia automaticamente o servidor sempre que houver alterações no código, tornando o desenvolvimento mais prático.
-
-Para usar o Nodemon:
-
-1. Instale o Nodemon globalmente:
-```bash
-npm install -g nodemon
-```
-
-2. Depois, no diretório do projeto, use o seguinte comando para iniciar o servidor:
-```bash
-nodemon server.js
-```
-
-Dessa forma, o servidor será automaticamente reiniciado sempre que você modificar o código em `server.js`.
