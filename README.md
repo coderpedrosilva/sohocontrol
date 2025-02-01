@@ -279,7 +279,7 @@ Agora, vamos juntar tudo em um único instalador `.exe`.
 
 📌 **Usando Inno Setup**
 
-1️⃣ Instale o Inno Setup.
+1️⃣ Instale o Inno Setup, [baixe aqui](https://inno-setup.br.uptodown.com/windows/download)
 
 2️⃣ Crie um arquivo `setup.iss` e adicione:
 
