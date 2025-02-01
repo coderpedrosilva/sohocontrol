@@ -175,6 +175,165 @@ Certifique-se de ter os seguintes softwares instalados:
 
 ---
 
+## Gerando um Instalador Completo para o Projeto (Backend + Frontend + MySQL)
+
+Para transformar seu projeto (frontend + backend + banco de dados MySQL) em um único arquivo executável para Windows, siga este plano:
+
+🔹 **Passo 1: Preparando o Backend (Spring Boot)**
+
+Você já tem um projeto Spring Boot. Vamos empacotá-lo como um JAR executável.
+
+📌 **Gerar um único JAR contendo todas as dependências**
+
+No terminal, dentro da pasta `sohocontrol_springboot`, execute:
+
+```
+mvn clean package
+```
+
+Isso irá gerar um arquivo JAR dentro da pasta `target/`, algo como:
+
+```
+target/sohocontrol-1.0.0.jar
+```
+
+Esse JAR pode ser executado com:
+
+```
+java -jar target/sohocontrol-1.0.0.jar
+```
+
+✅ Backend pronto para ser integrado! 🚀
+
+---
+
+🔹 **Passo 2: Preparando o Frontend (Node.js + Express)**
+
+Seu frontend usa Express.js como servidor e está na pasta `sohocontrol_bootstrap`.
+
+📌 **Converter o frontend em um executável**
+
+1️⃣ Instale o `pkg` (ferramenta para empacotar Node.js):
+
+```
+npm install -g pkg
+```
+
+2️⃣ Dentro da pasta `sohocontrol_bootstrap`, execute:
+
+```
+pkg server.js --targets win
+```
+
+Se der problema siga esses passos:
+
+### Criando o Executável `pkg.cmd` Manualmente
+
+1️⃣ Abra o PowerShell e execute o seguinte comando para criar o arquivo `pkg.cmd`:
+
+```
+Set-Content -Path "C:\Users\seuUsuario\AppData\Roaming\npm\pkg.cmd" -Value "@echo off`r`nnode %~dp0\node_modules\pkg\lib-es5\bin.js %*"
+```
+
+2️⃣ Agora, tente executar:
+
+```
+C:\Users\seuUsuario\AppData\Roaming\npm\pkg.cmd --version
+```
+
+Se funcionar, empacote seu `server.js` com:
+
+```
+C:\Users\seuUsuario\AppData\Roaming\npm\pkg.cmd server.js --targets win
+```
+
+Isso criará um arquivo executável `.exe` na pasta.
+
+✅ Frontend pronto para ser integrado!
+
+---
+
+🔹 **Passo 3: Empacotando o MySQL**
+
+O MySQL precisa estar instalado, então podemos criar um banco de dados portátil.
+
+1️⃣ **Exportar a base de dados**  
+No terminal/cmd, execute:
+
+```
+mysqldump -u root -p soho_control > sohocontrol.sql
+```
+
+Isso cria um arquivo `sohocontrol.sql` contendo todo o banco.
+
+2️⃣ **Criar um script de inicialização do MySQL**  
+Se quiser rodar o MySQL automaticamente, você pode usar MariaDB Portable, que não precisa de instalação.
+
+✅ Banco de dados pronto para ser integrado!
+
+---
+
+🔹 **Passo 4: Criando um Executável Único**
+
+Agora, vamos juntar tudo em um único instalador `.exe`.
+
+📌 **Usando Inno Setup**
+
+1️⃣ Instale o Inno Setup.
+
+2️⃣ Crie um arquivo `setup.iss` e adicione:
+
+```
+[Setup]
+AppName=Soho Control
+AppVersion=1.0
+DefaultDirName={commonpf}\SohoControl
+OutputDir=C:\Users\seuUsuario\Documents\executavel
+OutputBaseFilename=sohocontrol_installer
+Compression=lzma
+SolidCompression=yes
+WizardStyle=modern
+
+[Files]
+; Servidor executável
+Source: "C:\Users\seuUsuario\Documents\sohocontrol\sohocontrol_bootstrap\server.exe"; DestDir: "{app}"
+
+; Views (HTMLs)
+Source: "C:\Users\seuUsuario\Documents\sohocontrol\sohocontrol_bootstrap\views\*"; DestDir: "{app}\views"; Flags: recursesubdirs
+
+; Arquivos estáticos (CSS, JS, Imagens, Fontes, Bootstrap)
+Source: "C:\Users\seuUsuario\Documents\sohocontrol\sohocontrol_bootstrap\assets\*"; DestDir: "{app}\assets"; Flags: recursesubdirs
+
+; Outros arquivos necessários
+Source: "C:\Users\seuUsuario\Documents\executavel\sohocontrol-0.0.1-SNAPSHOT.jar"; DestDir: "{app}"
+Source: "C:\Users\seuUsuario\Documents\executavel\sohocontrol.sql"; DestDir: "{app}"
+Source: "C:\Users\seuUsuario\Documents\executavel\start.bat"; DestDir: "{app}"; Flags: ignoreversion
+
+[Icons]
+; Atalho na área de trabalho
+Name: "{commondesktop}\Soho Control"; Filename: "{app}\start.bat"
+; Atalho no menu iniciar
+Name: "{group}\Soho Control"; Filename: "{app}\start.bat"
+
+[Run]
+; Iniciar o servidor após a instalação
+Filename: "{app}\start.bat"; Description: "Iniciar o Soho Control"; Flags: nowait postinstall
+```
+
+3️⃣ Crie um script `start.bat` para iniciar tudo automaticamente:
+
+```
+@echo off
+start /B java -jar sohocontrol-1.0.0.jar
+start /B server.exe
+cd mysql && start /B mysqld --defaults-file=my.ini
+exit
+```
+
+✅ Agora, compile o instalador no Inno Setup e pronto! Você terá um `.exe` que instala e executa tudo com um clique no Windows.
+
+---
+
 ## Como Contribuir
 
 1. Faça um fork do repositório.
