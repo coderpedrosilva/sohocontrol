@@ -1,16 +1,28 @@
 {
-  "name": "sohocontrol_spa",
+  "name": "sohocontrol_bootstrap",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
+  "description": "Sistema Soho Control - Frontend com Express",
   "scripts": {
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
-    "express": "^4.21.1",
-    "sohocontrol_spa": "file:"
+    "express": "^4.21.1"
+  },
+  "pkg": {
+    "scripts": "server.js",
+    "assets": [
+      "views/**/*",  
+      "assets/**/*",
+      "assets/css/**/*",
+      "assets/fonts/fontawesome/**/*",
+      "assets/img/**/*",
+      "js/**/*",
+      "lib/bootstrap/**/*"
+    ]
   }
 }
