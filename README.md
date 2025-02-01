@@ -281,7 +281,7 @@ Agora, vamos juntar tudo em um único instalador `.exe`.
 
 1️⃣ Instale o Inno Setup, [baixe aqui](https://inno-setup.br.uptodown.com/windows/download)
 
-2️⃣ Crie um arquivo `setup.iss` e adicione:
+2️⃣ Confira a estrutura de suas pastas, crie um arquivo `setup.iss` e adicione:
 
 ```
 [Setup]
