@@ -114,7 +114,7 @@ Certifique-se de ter os seguintes softwares instalados:
 - **MySQL** como banco de dados.
 - **Node.js** para gerenciar dependências do frontend.
 - **Express.js** como servidor do frontend.
-- 
+  
 ### Passos para Configuração
 
 1. **Baixar o Projeto no GitHub**:
