@@ -177,11 +177,11 @@ Certifique-se de ter os seguintes softwares instalados:
 
 ## Gerando um Instalador Completo para o Projeto (Backend + Frontend + MySQL)
 
-Para transformar seu projeto (frontend + backend + banco de dados MySQL) em um único arquivo executável para Windows, siga este plano:
+Para transformar o projeto (frontend + backend + banco de dados MySQL) em um único arquivo executável para Windows, siga este plano:
 
 🔹 **Passo 1: Preparando o Backend (Spring Boot)**
 
-Você já tem um projeto Spring Boot. Vamos empacotá-lo como um JAR executável.
+Já temos o projeto Spring Boot. Vamos empacotá-lo como um JAR executável.
 
 📌 **Gerar um único JAR contendo todas as dependências**
 
@@ -209,7 +209,7 @@ java -jar target/sohocontrol-1.0.0.jar
 
 🔹 **Passo 2: Preparando o Frontend (Node.js + Express)**
 
-Seu frontend usa Express.js como servidor e está na pasta `sohocontrol_bootstrap`.
+O frontend usa Express.js como servidor e está na pasta `sohocontrol_bootstrap`.
 
 📌 **Converter o frontend em um executável**
 
@@ -241,7 +241,7 @@ Set-Content -Path "C:\Users\seuUsuario\AppData\Roaming\npm\pkg.cmd" -Value "@ech
 C:\Users\seuUsuario\AppData\Roaming\npm\pkg.cmd --version
 ```
 
-Se funcionar, empacote seu `server.js` com:
+Se funcionar, empacote o `server.js` com:
 
 ```
 C:\Users\seuUsuario\AppData\Roaming\npm\pkg.cmd server.js --targets win
